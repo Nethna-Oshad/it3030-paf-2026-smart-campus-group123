@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
+import { useNavigate } from 'react-router-dom';
 import facilityService from '../../services/facilityService';
 import { AuthContext } from '../../context/AuthContext';
 import AddFacilityModal from './AddFacilityModal'; 
@@ -6,6 +7,7 @@ import EditFacilityModal from './EditFacilityModal'; // IMPORT THE NEW MODAL!
 
 const FacilitiesCatalogue = () => {
     const { user } = useContext(AuthContext);
+    const navigate = useNavigate();
     
     const [facilities, setFacilities] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -123,7 +125,9 @@ const FacilitiesCatalogue = () => {
                                     <p style={{ margin: 0 }}><strong>Hours:</strong> {fac.openTime || 'N/A'} - {fac.closeTime || 'N/A'}</p>
                                 </div>
 
-                                <button style={{ width: '100%', padding: '10px', backgroundColor: '#e7f1ff', color: '#0c4128', border: '1px solid #b6d4fe', borderRadius: '5px', cursor: 'pointer', fontWeight: 'bold' }}>
+                                <button
+                                    onClick={() => navigate(`/facilities/${fac.id}`)}
+                                    style={{ width: '100%', padding: '10px', backgroundColor: '#e7f1ff', color: '#0c4128', border: '1px solid #b6d4fe', borderRadius: '5px', cursor: 'pointer', fontWeight: 'bold' }}>
                                     View Details & Book
                                 </button>
 
