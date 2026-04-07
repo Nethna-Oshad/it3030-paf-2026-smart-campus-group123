@@ -27,7 +27,11 @@ export const AuthProvider = ({ children }) => {
     };
 
     const logout = () => {
-        // Redirect to Spring Boot's logout endpoint
+        // 1. Clear the React user state from memory
+        setUser(null);
+        
+        // 2. Redirect to Spring Boot's logout endpoint
+        // Spring Boot will destroy the session and bounce you back to http://localhost:5173/
         window.location.href = 'http://localhost:8086/logout';
     };
 
