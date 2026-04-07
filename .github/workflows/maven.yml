@@ -2,7 +2,7 @@ name: Java & Node CI
 
 on:
   push:
-    branches: [ "main", "nisandi", "nethna" ]
+    branches: [ "main", "nisandi", "nethna", "prageeth" ]
   pull_request:
     branches: [ "main" ]
 
