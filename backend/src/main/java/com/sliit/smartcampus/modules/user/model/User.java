@@ -5,8 +5,8 @@ import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-@Data // This Lombok annotation automatically generates getters, setters, and constructors
-@Document(collection = "users") // Tells Spring to save this in the 'users' MongoDB collection
+@Data
+@Document(collection = "users")
 public class User {
     
     @Id
@@ -14,7 +14,10 @@ public class User {
     
     private String email;
     private String name;
-    private String pictureUrl; // Let's grab their Google profile picture too for a nice UI later!
+    private String pictureUrl; 
+    
+    // NEW FIELD: Needed for manual registration
+    private String password; 
     
     private Role role;
 }

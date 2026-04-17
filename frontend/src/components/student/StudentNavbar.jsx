@@ -1,6 +1,6 @@
 import React, { useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { AuthContext } from '../../context/AuthContext';
+import { AuthContext } from '../../context/AuthContext'; // <-- FIXED PATH (Removed one ../)
 
 const StudentNavbar = () => {
     const { user, logout } = useContext(AuthContext);
@@ -17,18 +17,24 @@ const StudentNavbar = () => {
                 </div>
             </div>
 
-            {/* CONDITIONAL RENDERING: Show Profile if logged in, otherwise show Login Button */}
             {user ? (
                 <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
                     <span style={{ fontWeight: 'bold', color: '#084298' }}>Hi, {user.name}</span>
                     <button onClick={() => { logout(); navigate('/'); }} style={{ backgroundColor: '#f8f9fa', color: '#dc3545', border: '1px solid #dc3545', padding: '6px 12px', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}>Logout</button>
                 </div>
             ) : (
-                <button 
-                    onClick={() => navigate('/login')} 
-                    style={{ backgroundColor: '#0d6efd', color: 'white', border: 'none', padding: '8px 20px', borderRadius: '5px', cursor: 'pointer', fontWeight: 'bold', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>
-                    Login
-                </button>
+                <div style={{ display: 'flex', gap: '10px' }}>
+                    <button 
+                        onClick={() => navigate('/login')} 
+                        style={{ backgroundColor: 'white', color: '#0d6efd', border: '1px solid #0d6efd', padding: '8px 20px', borderRadius: '5px', cursor: 'pointer', fontWeight: 'bold' }}>
+                        Login
+                    </button>
+                    <button 
+                        onClick={() => navigate('/register')} 
+                        style={{ backgroundColor: '#0d6efd', color: 'white', border: 'none', padding: '8px 20px', borderRadius: '5px', cursor: 'pointer', fontWeight: 'bold', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>
+                        Register
+                    </button>
+                </div>
             )}
         </nav>
     );
