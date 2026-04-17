@@ -16,24 +16,24 @@ import java.util.List;
 
 @Configuration
 @EnableWebSecurity
-@RequiredArgsConstructor // Added Lombok annotation to auto-inject the service
+@RequiredArgsConstructor 
 public class SecurityConfig {
 
-    private final CustomOAuth2UserService customOAuth2UserService; // Injecting our new service
+    private final CustomOAuth2UserService customOAuth2UserService; 
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .csrf(csrf -> csrf.disable())
-            // Temporarily allowing /api/** for Postman testing
             .authorizeHttpRequests(auth -> auth
+                // /api/** covers /api/users/register, allowing new students to sign up!
                 .requestMatchers("/login**", "/error**", "/api/**", "/logout").permitAll()
                 .anyRequest().authenticated()
             )
             .oauth2Login(oauth2 -> oauth2
                 .userInfoEndpoint(userInfo -> userInfo
-                    .userService(customOAuth2UserService) // Telling Spring to use our logic!
+                    .userService(customOAuth2UserService) 
                 )
                 .defaultSuccessUrl("http://localhost:5173", true) 
             )

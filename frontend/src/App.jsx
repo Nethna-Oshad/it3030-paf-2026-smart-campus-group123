@@ -17,8 +17,9 @@ import HomePage from './Pages/student/HomePage';
 import FacilitiesCatalogue from './Pages/facilities/FacilitiesCatalogue';
 import FacilityDetails from './Pages/facilities/FacilityDetails';
 
-// --- IMPORT AUTH PAGE ---
+// --- IMPORT AUTH PAGES ---
 import LoginPage from './Pages/auth/LoginPage';
+import RegisterPage from './Pages/auth/RegisterPage'; // <-- IMPORTED THE NEW REGISTER PAGE
 
 // We create an internal component to handle routing logic cleanly
 const AppRoutes = () => {
@@ -66,10 +67,9 @@ const AppRoutes = () => {
           <Route path="/facilities" element={<FacilitiesCatalogue />} />
           <Route path="/facilities/:id" element={<FacilityDetails />} />
           
-          {/* If they are NOT logged in, show the LoginPage. 
-              If they ARE logged in but try to go to /login, redirect them safely to home.
-          */}
+          {/* Auth Routes */}
           <Route path="/login" element={!user ? <LoginPage /> : <Navigate to="/" />} />
+          <Route path="/register" element={!user ? <RegisterPage /> : <Navigate to="/" />} /> {/* <-- ADDED THE REGISTER ROUTE */}
           
           {/* Catch-all route */}
           <Route path="*" element={<Navigate to="/" />} />
