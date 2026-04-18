@@ -48,7 +48,12 @@ const StudentNavbar = () => {
                 navigate('/my-bookings', { state: { highlightId: notif.referenceId } });
                 break;
             case 'TICKET':
-                navigate('/my-tickets', { state: { highlightId: notif.referenceId } });
+                // --- FIXED: ROUTE DIRECTLY TO TICKET DETAILS ---
+                if (notif.referenceId) {
+                    navigate(`/incidents/${notif.referenceId}`);
+                } else {
+                    navigate('/incidents');
+                }
                 break;
             case 'FACILITY':
                 if (notif.referenceId) navigate(`/facilities/${notif.referenceId}`);

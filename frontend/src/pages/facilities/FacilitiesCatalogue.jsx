@@ -3,31 +3,30 @@ import { useNavigate } from 'react-router-dom';
 import facilityService from '../../services/facilityService';
 import { AuthContext } from '../../context/AuthContext';
 import AddFacilityModal from './AddFacilityModal'; 
-import EditFacilityModal from './EditFacilityModal'; // IMPORT THE NEW MODAL!
+import EditFacilityModal from './EditFacilityModal';
 
 const FacilitiesCatalogue = () => {
     const { user } = useContext(AuthContext);
     const navigate = useNavigate();
     
-    const [facilities, setFacilities] = useState([]);
+    const [facilitiesLive, setFacilitiesLive] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [filterType, setFilterType] = useState('ALL');
     
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-    
-    // State to track which facility is currently being edited
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [facilityToEdit, setFacilityToEdit] = useState(null);
 
     useEffect(() => {
-        fetchFacilities();
+        fetchLiveFacilities();
     }, []);
 
-    const fetchFacilities = async () => {
+    const fetchLiveFacilities = async () => {
         try {
-            const data = await facilityService.getAllFacilities();
-            setFacilities(data);
+            // --- NEW: Fetch the LIVE FUSION data instead of just standard facilities ---
+            const data = await facilityService.getFacilitiesWithLiveStatus();
+            setFacilitiesLive(data);
         } catch (error) {
             console.error("Error loading facilities:", error);
         } finally {
@@ -35,12 +34,11 @@ const FacilitiesCatalogue = () => {
         }
     };
 
-    // --- NEW: Handle the Delete button click ---
     const handleDelete = async (id) => {
         if (window.confirm("Are you sure you want to completely delete this resource?")) {
             try {
                 await facilityService.deleteFacility(id);
-                fetchFacilities(); // Refresh grid after delete
+                fetchLiveFacilities(); 
             } catch (error) {
                 console.error("Failed to delete", error);
                 alert("Error deleting resource.");
@@ -48,20 +46,20 @@ const FacilitiesCatalogue = () => {
         }
     };
 
-    // --- NEW: Handle opening the Edit modal ---
     const handleEditClick = (facility) => {
         setFacilityToEdit(facility);
         setIsEditModalOpen(true);
     };
 
-    const filteredFacilities = facilities.filter(fac => {
+    const filteredFacilities = facilitiesLive.filter(item => {
+        const fac = item.facility;
         const matchSearch = fac.name?.toLowerCase().includes(searchTerm.toLowerCase()) || 
                             fac.location?.toLowerCase().includes(searchTerm.toLowerCase());
         const matchType = filterType === 'ALL' || fac.type === filterType;
         return matchSearch && matchType;
     });
 
-    if (loading) return <div style={{ textAlign: 'center', padding: '50px', color: '#0d6efd' }}>Loading Campus Resources...</div>;
+    if (loading) return <div style={{ textAlign: 'center', padding: '50px', color: '#0d6efd' }}>Loading Live Campus Nexus...</div>;
 
     return (
         <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '20px', fontFamily: 'sans-serif' }}>
@@ -69,7 +67,7 @@ const FacilitiesCatalogue = () => {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
                 <div>
                     <h1 style={{ color: '#084298', margin: '0 0 5px 0' }}>Facilities & Assets</h1>
-                    <p style={{ color: '#0d6efd', margin: 0 }}>Browse and book university resources</p>
+                    <p style={{ color: '#0d6efd', margin: 0 }}>Live Campus Map & Resource Booking</p>
                 </div>
                 
                 {user && user.role === 'ADMIN' && (
@@ -99,67 +97,79 @@ const FacilitiesCatalogue = () => {
                 {filteredFacilities.length === 0 ? (
                     <p style={{ color: '#6c757d' }}>No resources found.</p>
                 ) : (
-                    filteredFacilities.map(fac => (
-                        <div key={fac.id} style={{ border: '1px solid #cfe2ff', borderRadius: '8px', overflow: 'hidden', backgroundColor: 'white', boxShadow: '0 4px 6px rgba(0,0,0,0.05)' }}>
-                            
-                            {/* Display the Image or a Placeholder */}
-                            {fac.imageUrl ? (
-                                <img src={fac.imageUrl} alt={fac.name} style={{ width: '100%', height: '160px', objectFit: 'cover', borderBottom: '1px solid #cfe2ff' }} />
-                            ) : (
-                                <div style={{ height: '160px', backgroundColor: '#cfe2ff', display: 'flex', alignItems: 'center', justifyContent: 'center', borderBottom: '1px solid #cfe2ff' }}>
-                                    <span style={{ color: '#084298', fontWeight: 'bold', fontSize: '18px' }}>{fac.type}</span>
-                                </div>
-                            )}
-
-                            <div style={{ padding: '15px' }}>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
-                                    <h3 style={{ margin: 0, color: '#084298' }}>{fac.name}</h3>
-                                    <span style={{ fontSize: '12px', padding: '3px 8px', borderRadius: '12px', backgroundColor: fac.status === 'ACTIVE' ? '#d1e7dd' : '#f8d7da', color: fac.status === 'ACTIVE' ? '#0f5132' : '#842029', fontWeight: 'bold' }}>
-                                        {fac.status}
-                                    </span>
-                                </div>
-                                <p style={{ fontSize: '14px', color: '#6c757d', marginBottom: '15px' }}>📍 {fac.location}</p>
+                    filteredFacilities.map(item => {
+                        const fac = item.facility;
+                        const isAvailable = item.liveStatus === "AVAILABLE NOW";
+                        
+                        return (
+                            <div key={fac.id} style={{ border: `1px solid ${item.statusColor}40`, borderRadius: '12px', overflow: 'hidden', backgroundColor: 'white', boxShadow: `0 4px 15px ${item.statusColor}20`, transition: 'transform 0.2s', position: 'relative' }}>
                                 
-                                <div style={{ backgroundColor: '#f8f9fa', padding: '10px', borderRadius: '5px', fontSize: '14px', marginBottom: '15px' }}>
-                                    <p style={{ margin: '0 0 5px 0' }}><strong>Capacity:</strong> {fac.capacity > 0 ? fac.capacity : 'N/A'}</p>
-                                    <p style={{ margin: 0 }}><strong>Hours:</strong> {fac.openTime || 'N/A'} - {fac.closeTime || 'N/A'}</p>
+                                {/* LIVE STATUS BADGE OVERLAY */}
+                                <div style={{ position: 'absolute', top: '10px', right: '10px', backgroundColor: 'white', padding: '4px 12px', borderRadius: '20px', fontSize: '11px', fontWeight: 'bold', color: item.statusColor, border: `1px solid ${item.statusColor}`, display: 'flex', alignItems: 'center', gap: '5px', boxShadow: '0 2px 5px rgba(0,0,0,0.1)', zIndex: 10 }}>
+                                    <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: item.statusColor, animation: isAvailable ? 'none' : 'pulse 2s infinite' }}></div>
+                                    {item.liveStatus}
                                 </div>
 
-                                <button
-                                    onClick={() => navigate(`/facilities/${fac.id}`)}
-                                    style={{ width: '100%', padding: '10px', backgroundColor: '#e7f1ff', color: '#0c4128', border: '1px solid #b6d4fe', borderRadius: '5px', cursor: 'pointer', fontWeight: 'bold' }}>
-                                    View Details & Book
-                                </button>
-
-                                {/* ADMIN CONTROLS: EDIT AND DELETE */}
-                                {user && user.role === 'ADMIN' && (
-                                    <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
-                                        <button onClick={() => handleEditClick(fac)} style={{ flex: 1, padding: '8px', backgroundColor: '#ffc107', color: '#000', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}>
-                                            Edit
-                                        </button>
-                                        <button onClick={() => handleDelete(fac.id)} style={{ flex: 1, padding: '8px', backgroundColor: '#dc3545', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}>
-                                            Delete
-                                        </button>
+                                {fac.imageUrl ? (
+                                    <img src={fac.imageUrl} alt={fac.name} style={{ width: '100%', height: '160px', objectFit: 'cover', borderBottom: '1px solid #eee' }} />
+                                ) : (
+                                    <div style={{ height: '160px', backgroundColor: '#cfe2ff', display: 'flex', alignItems: 'center', justifyContent: 'center', borderBottom: '1px solid #cfe2ff' }}>
+                                        <span style={{ color: '#084298', fontWeight: 'bold', fontSize: '18px' }}>{fac.type}</span>
                                     </div>
                                 )}
+
+                                <div style={{ padding: '20px' }}>
+                                    <h3 style={{ margin: '0 0 5px 0', color: '#212529' }}>{fac.name}</h3>
+                                    <p style={{ fontSize: '14px', color: '#6c757d', margin: '0 0 15px 0' }}>📍 {fac.location}</p>
+                                    
+                                    {/* ACTIVITY SUBTEXT */}
+                                    <div style={{ backgroundColor: `${item.statusColor}10`, padding: '10px', borderRadius: '6px', fontSize: '13px', color: item.statusColor, marginBottom: '15px', fontWeight: '500', borderLeft: `3px solid ${item.statusColor}` }}>
+                                        {item.currentActivity}
+                                    </div>
+
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', color: '#495057', fontSize: '13px', marginBottom: '20px' }}>
+                                        <span>👥 {fac.capacity > 0 ? fac.capacity : 'N/A'} Seats</span>
+                                        <span>🕒 {fac.openTime || 'N/A'} - {fac.closeTime || 'N/A'}</span>
+                                    </div>
+
+                                    <button
+                                        onClick={() => navigate(`/facilities/${fac.id}`)}
+                                        style={{ width: '100%', padding: '12px', backgroundColor: isAvailable ? '#0d6efd' : '#e9ecef', color: isAvailable ? 'white' : '#495057', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold', transition: 'background-color 0.2s' }}>
+                                        View Details & Book
+                                    </button>
+
+                                    {/* ADMIN CONTROLS */}
+                                    {user && user.role === 'ADMIN' && (
+                                        <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
+                                            <button onClick={() => handleEditClick(fac)} style={{ flex: 1, padding: '8px', backgroundColor: '#ffc107', color: '#000', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}>
+                                                Edit
+                                            </button>
+                                            <button onClick={() => handleDelete(fac.id)} style={{ flex: 1, padding: '8px', backgroundColor: '#dc3545', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}>
+                                                Delete
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
-                        </div>
-                    ))
+                        );
+                    })
                 )}
             </div>
 
             <AddFacilityModal 
                 isOpen={isAddModalOpen} 
                 onClose={() => setIsAddModalOpen(false)} 
-                onFacilityAdded={fetchFacilities} 
+                onFacilityAdded={fetchLiveFacilities} 
             />
 
-            <EditFacilityModal 
-                isOpen={isEditModalOpen} 
-                onClose={() => setIsEditModalOpen(false)} 
-                onFacilityUpdated={fetchFacilities} 
-                facility={facilityToEdit}
-            />
+            {facilityToEdit && (
+                <EditFacilityModal 
+                    isOpen={isEditModalOpen} 
+                    onClose={() => setIsEditModalOpen(false)} 
+                    onFacilityUpdated={fetchLiveFacilities} 
+                    facility={facilityToEdit}
+                />
+            )}
 
         </div>
     );
