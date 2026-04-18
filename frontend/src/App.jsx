@@ -8,11 +8,13 @@ import Footer from './components/common/Footer';
 // --- ADMIN ---
 import AdminSidebar from './components/admin/AdminSidebar';
 import AdminDashboard from './Pages/admin/AdminDashboard';
+import AdminBookings from './Pages/bookings/AdminBookings'; // <-- NEW IMPORT
 import AdminBookings from './Pages/bookings/AdminBookings';
 
 // --- STUDENT ---
 import StudentNavbar from './components/student/StudentNavbar';
 import HomePage from './Pages/student/HomePage';
+import StudentBookings from './Pages/bookings/StudentBookings'; // <-- NEW IMPORT
 import StudentBookings from './Pages/bookings/StudentBookings';
 
 // --- FACILITIES ---
@@ -27,11 +29,18 @@ import TicketDetails from './Pages/incidents/TicketDetails';
 // --- AUTH ---
 import LoginPage from './Pages/auth/LoginPage';
 import RegisterPage from './Pages/auth/RegisterPage';
+import RegisterPage from './Pages/auth/RegisterPage';
 
 const AppRoutes = () => {
   const { user, loading } = useContext(AuthContext);
 
   if (loading) {
+    return <div style={{ padding: '50px', textAlign: 'center', color: '#0d6efd', fontWeight: 'bold', fontFamily: 'sans-serif' }}>Loading Campus Nexus...</div>;
+  }
+
+  // ==========================================
+  // 1. ADMIN LAYOUT (Sidebar + Dashboard)
+  // ==========================================
     return (
       <div style={{ padding: '50px', textAlign: 'center', color: '#0d6efd', fontWeight: 'bold' }}>
         Loading Campus Nexus...
@@ -52,6 +61,7 @@ const AppRoutes = () => {
 
               <Route path="/facilities" element={<FacilitiesCatalogue />} />
               <Route path="/facilities/:id" element={<FacilityDetails />} />
+              <Route path="/admin/bookings" element={<AdminBookings />} /> {/* <-- NEW ROUTE */}
 
               <Route path="/admin/bookings" element={<AdminBookings />} />
 
@@ -69,6 +79,9 @@ const AppRoutes = () => {
     );
   }
 
+  // ==========================================
+  // 2. PUBLIC & STUDENT LAYOUT (Top Navbar + Home)
+  // ==========================================
   // STUDENT / PUBLIC
   return (
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', backgroundColor: '#f4f7f6' }}>
@@ -80,6 +93,11 @@ const AppRoutes = () => {
 
           <Route path="/facilities" element={<FacilitiesCatalogue />} />
           <Route path="/facilities/:id" element={<FacilityDetails />} />
+          
+          {/* Protected Route: Only logged-in students can see their bookings */}
+          <Route path="/my-bookings" element={user ? <StudentBookings /> : <Navigate to="/login" />} /> {/* <-- NEW ROUTE */}
+          
+          {/* Auth Routes */}
 
           <Route
             path="/my-bookings"
@@ -92,6 +110,9 @@ const AppRoutes = () => {
 
           <Route path="/login" element={!user ? <LoginPage /> : <Navigate to="/" />} />
           <Route path="/register" element={!user ? <RegisterPage /> : <Navigate to="/" />} />
+          
+          {/* Catch-all route */}
+          <Route path="/register" element={!user ? <RegisterPage /> : <Navigate to="/" />} />
 
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
@@ -102,6 +123,9 @@ const AppRoutes = () => {
   );
 };
 
+// ==========================================
+// MAIN APP WRAPPER
+// ==========================================
 function App() {
   return (
     <Router>
