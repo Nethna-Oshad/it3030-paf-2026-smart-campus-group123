@@ -1,17 +1,44 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, useRef } from 'react';
+import { useLocation } from 'react-router-dom'; // <-- IMPORT THIS
 import { AuthContext } from '../../context/AuthContext';
 import bookingService from '../../services/bookingService';
+import { QRCodeSVG } from 'qrcode.react';
 
 const StudentBookings = () => {
     const { user } = useContext(AuthContext);
+    const location = useLocation(); // <-- CATCH THE STATE FROM NAVBAR
+    
     const [bookings, setBookings] = useState([]);
     const [loading, setLoading] = useState(true);
+
+    const [selectedQrBooking, setSelectedQrBooking] = useState(null);
+    const [checkInLoading, setCheckInLoading] = useState(false);
+    
+    // --- NEW: State to track which card to highlight ---
+    const [highlightedBookingId, setHighlightedBookingId] = useState(null);
+    const bookingRefs = useRef({}); // To hold references to each card for scrolling
 
     useEffect(() => {
         if (user && user.id) {
             loadMyBookings();
         }
     }, [user]);
+
+    // Check for highlight ID whenever bookings load or location changes
+    useEffect(() => {
+        if (!loading && location.state?.highlightId && bookingRefs.current[location.state.highlightId]) {
+            const id = location.state.highlightId;
+            setHighlightedBookingId(id);
+            
+            // Scroll to the specific card smoothly
+            bookingRefs.current[id].scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+            // Remove the highlight after 3 seconds
+            setTimeout(() => {
+                setHighlightedBookingId(null);
+            }, 3000);
+        }
+    }, [loading, location.state, bookings]);
 
     const loadMyBookings = async () => {
         try {
@@ -25,7 +52,6 @@ const StudentBookings = () => {
         }
     };
 
-    // NEW CANCEL FUNCTION
     const handleCancel = async (id) => {
         if (window.confirm("Are you sure you want to cancel this request?")) {
             try {
@@ -34,6 +60,20 @@ const StudentBookings = () => {
             } catch (error) {
                 alert("Failed to cancel booking.");
             }
+        }
+    };
+
+    const handleCheckIn = async (bookingId) => {
+        setCheckInLoading(true);
+        try {
+            await bookingService.checkInBooking(bookingId);
+            alert("Check-in Successful!");
+            setSelectedQrBooking(null);
+            loadMyBookings();
+        } catch (error) {
+            alert(error.response?.data || "Check-in failed");
+        } finally {
+            setCheckInLoading(false);
         }
     };
 
@@ -50,41 +90,93 @@ const StudentBookings = () => {
                 </div>
             ) : (
                 <div style={{ display: 'grid', gap: '20px' }}>
-                    {bookings.map(booking => (
-                        <div key={booking.id} style={{ backgroundColor: 'white', padding: '20px', borderRadius: '10px', border: '1px solid #cfe2ff', boxShadow: '0 4px 6px rgba(0,0,0,0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            
-                            <div>
-                                <h3 style={{ margin: '0 0 10px 0', color: '#084298' }}>{booking.facilityName}</h3>
-                                <p style={{ margin: '5px 0', color: '#495057', fontSize: '14px' }}><strong>Purpose:</strong> {booking.purpose}</p>
-                                <p style={{ margin: '5px 0', color: '#495057', fontSize: '14px' }}>
-                                    <strong>Time:</strong> {new Date(booking.startTime).toLocaleString()} - {new Date(booking.endTime).toLocaleString()}
-                                </p>
-                            </div>
-
-                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '10px' }}>
-                                <div style={{ 
-                                    padding: '8px 16px', 
-                                    borderRadius: '20px', 
-                                    fontWeight: 'bold', 
-                                    fontSize: '14px',
-                                    backgroundColor: booking.status === 'APPROVED' ? '#d1e7dd' : booking.status === 'REJECTED' || booking.status === 'CANCELLED' ? '#f8d7da' : '#fff3cd',
-                                    color: booking.status === 'APPROVED' ? '#0f5132' : booking.status === 'REJECTED' || booking.status === 'CANCELLED' ? '#842029' : '#664d03'
-                                }}>
-                                    {booking.status}
-                                </div>
+                    {bookings.map(booking => {
+                        const isHighlighted = highlightedBookingId === booking.id;
+                        
+                        return (
+                            <div 
+                                key={booking.id} 
+                                // Assign the reference to this specific div
+                                ref={(el) => (bookingRefs.current[booking.id] = el)}
+                                style={{ 
+                                    backgroundColor: 'white', 
+                                    padding: '20px', 
+                                    borderRadius: '10px', 
+                                    boxShadow: isHighlighted ? '0 0 15px rgba(13, 110, 253, 0.5)' : '0 4px 6px rgba(0,0,0,0.05)', 
+                                    border: isHighlighted ? '2px solid #0d6efd' : '1px solid #cfe2ff',
+                                    display: 'flex', 
+                                    justifyContent: 'space-between', 
+                                    alignItems: 'center',
+                                    transition: 'all 0.5s ease-in-out' // Smooth transition for the glowing border
+                                }}
+                            >
                                 
-                                {/* NEW CANCEL BUTTON VISIBLE ONLY IF PENDING */}
-                                {booking.status === 'PENDING' && (
-                                    <button 
-                                        onClick={() => handleCancel(booking.id)}
-                                        style={{ backgroundColor: 'transparent', color: '#dc3545', border: '1px solid #dc3545', padding: '4px 10px', borderRadius: '4px', cursor: 'pointer', fontSize: '12px', fontWeight: 'bold' }}>
-                                        Cancel Request
-                                    </button>
-                                )}
-                            </div>
+                                <div>
+                                    <h3 style={{ margin: '0 0 10px 0', color: '#084298', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                        {booking.facilityName}
+                                        
+                                        {booking.checkedIn && (
+                                            <span style={{ fontSize: '12px', padding: '4px 8px', borderRadius: '12px', fontWeight: 'bold', backgroundColor: '#198754', color: 'white' }}>
+                                                ✓ CHECKED IN
+                                            </span>
+                                        )}
+                                    </h3>
+                                    <p style={{ margin: '5px 0', color: '#495057', fontSize: '14px' }}><strong>Purpose:</strong> {booking.purpose}</p>
+                                    <p style={{ margin: '5px 0', color: '#495057', fontSize: '14px' }}>
+                                        <strong>Time:</strong> {new Date(booking.startTime).toLocaleString()} - {new Date(booking.endTime).toLocaleString()}
+                                    </p>
+                                </div>
 
+                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '10px' }}>
+                                    <div style={{ 
+                                        padding: '8px 16px', 
+                                        borderRadius: '20px', 
+                                        fontWeight: 'bold', 
+                                        fontSize: '14px',
+                                        backgroundColor: booking.status === 'APPROVED' ? '#d1e7dd' : booking.status === 'REJECTED' || booking.status === 'CANCELLED' ? '#f8d7da' : '#fff3cd',
+                                        color: booking.status === 'APPROVED' ? '#0f5132' : booking.status === 'REJECTED' || booking.status === 'CANCELLED' ? '#842029' : '#664d03'
+                                    }}>
+                                        {booking.status}
+                                    </div>
+                                    
+                                    {booking.status === 'PENDING' && (
+                                        <button 
+                                            onClick={() => handleCancel(booking.id)}
+                                            style={{ backgroundColor: 'transparent', color: '#dc3545', border: '1px solid #dc3545', padding: '4px 10px', borderRadius: '4px', cursor: 'pointer', fontSize: '12px', fontWeight: 'bold' }}>
+                                            Cancel Request
+                                        </button>
+                                    )}
+
+                                    {booking.status === 'APPROVED' && !booking.checkedIn && (
+                                        <button 
+                                            onClick={() => setSelectedQrBooking(booking)}
+                                            style={{ backgroundColor: '#084298', color: 'white', border: 'none', padding: '6px 12px', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px' }}
+                                        >
+                                            📱 Check-in Pass
+                                        </button>
+                                    )}
+                                </div>
+
+                            </div>
+                        );
+                    })}
+                </div>
+            )}
+
+            {/* --- QR CODE MODAL REMAINING THE SAME --- */}
+            {selectedQrBooking && (
+                <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000 }}>
+                    <div style={{ backgroundColor: 'white', padding: '40px', borderRadius: '12px', textAlign: 'center', maxWidth: '400px', width: '100%', boxShadow: '0 10px 30px rgba(0,0,0,0.2)' }}>
+                        <h3 style={{ margin: '0 0 20px 0', color: '#084298' }}>Check-in Pass</h3>
+                        <p style={{ color: '#6c757d', marginBottom: '20px', fontSize: '14px' }}>{selectedQrBooking.facilityName}</p>
+                        <div style={{ padding: '20px', backgroundColor: 'white', border: '2px solid #cfe2ff', borderRadius: '12px', display: 'inline-block', marginBottom: '30px' }}>
+                            <QRCodeSVG value={`smartcampus://checkin/${selectedQrBooking.id}`} size={200} level={"H"} />
                         </div>
-                    ))}
+                        <div style={{ display: 'flex', gap: '15px', justifyContent: 'center' }}>
+                            <button onClick={() => setSelectedQrBooking(null)} style={{ backgroundColor: '#f8f9fa', color: '#495057', border: '1px solid #ced4da', padding: '10px 20px', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold' }}>Close</button>
+                            <button onClick={() => handleCheckIn(selectedQrBooking.id)} disabled={checkInLoading} style={{ backgroundColor: '#198754', color: 'white', border: 'none', padding: '10px 20px', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold' }}>{checkInLoading ? 'Processing...' : 'Check IN Now'}</button>
+                        </div>
+                    </div>
                 </div>
             )}
         </div>

@@ -1,73 +1,153 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import facilityService from '../../services/facilityService';
+import bookingService from '../../services/bookingService';
 
 const AdminDashboard = () => {
     const navigate = useNavigate();
     
-    // State to hold our real database statistics
-    const [stats, setStats] = useState({
-        totalFacilities: 0,
-        activeFacilities: 0,
-        maintenanceFacilities: 0
+    const [facilityStats, setFacilityStats] = useState({
+        total: 0,
+        active: 0,
+        maintenance: 0
     });
+    const [bookingAnalytics, setBookingAnalytics] = useState(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const fetchDashboardData = async () => {
+            
+            // 1. Fetch Facilities Safely
             try {
-                // Fetch all your real data from Spring Boot!
-                const data = await facilityService.getAllFacilities();
+                const facilitiesData = await facilityService.getAllFacilities();
                 
-                // Calculate the statistics
-                const active = data.filter(fac => fac.status === 'ACTIVE').length;
-                const maintenance = data.filter(fac => fac.status === 'OUT_OF_SERVICE').length;
+                // Bulletproof case-insensitive check
+                const active = facilitiesData.filter(fac => fac.status && fac.status.toUpperCase() === 'ACTIVE').length;
+                const maintenance = facilitiesData.filter(fac => fac.status && fac.status.toUpperCase() === 'OUT_OF_SERVICE').length;
 
-                setStats({
-                    totalFacilities: data.length,
-                    activeFacilities: active,
-                    maintenanceFacilities: maintenance
+                setFacilityStats({
+                    total: facilitiesData.length,
+                    active: active,
+                    maintenance: maintenance
                 });
             } catch (error) {
-                console.error("Error loading dashboard data:", error);
-            } finally {
-                setLoading(false);
+                console.error("Error loading facilities data:", error);
             }
+
+            // 2. Fetch Analytics Safely
+            try {
+                const analyticsData = await bookingService.getAnalytics();
+                setBookingAnalytics(analyticsData);
+            } catch (error) {
+                console.error("Error loading booking analytics:", error);
+            }
+
+            setLoading(false);
         };
 
         fetchDashboardData();
     }, []);
 
-    const cardStyle = { backgroundColor: 'white', padding: '25px', borderRadius: '10px', border: '1px solid #cfe2ff', flex: 1, textAlign: 'center', boxShadow: '0 4px 6px rgba(0,0,0,0.05)' };
+    const maxFacilityBookings = bookingAnalytics ? Math.max(...Object.values(bookingAnalytics.topFacilities || { 0: 1 })) : 1;
+    const maxHourBookings = bookingAnalytics ? Math.max(...Object.values(bookingAnalytics.peakHours || { 0: 1 })) : 1;
 
-    if (loading) return <div style={{ padding: '40px', textAlign: 'center', color: '#084298' }}>Loading Live Dashboard...</div>;
+    const cardStyle = { backgroundColor: 'white', padding: '25px', borderRadius: '12px', border: '1px solid #cfe2ff', flex: 1, textAlign: 'center', boxShadow: '0 4px 10px rgba(0,0,0,0.05)' };
+
+    if (loading) return <div style={{ padding: '40px', textAlign: 'center', color: '#084298', fontWeight: 'bold', fontFamily: 'sans-serif' }}>Loading Live Operations Dashboard...</div>;
 
     return (
-        <div style={{ padding: '30px', width: '100%', maxWidth: '1200px', margin: '0 auto' }}>
-            <h1 style={{ color: '#084298', marginBottom: '10px' }}>Admin Overview</h1>
-            <p style={{ color: '#6c757d', marginBottom: '30px' }}>Live statistics from your Campus Nexus database.</p>
+        <div style={{ padding: '30px', width: '100%', maxWidth: '1200px', margin: '0 auto', fontFamily: 'sans-serif' }}>
             
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
+                <div>
+                    <h1 style={{ color: '#084298', margin: '0 0 10px 0' }}>Operations Dashboard</h1>
+                    <p style={{ color: '#6c757d', margin: 0 }}>Live statistics from your Campus Nexus database.</p>
+                </div>
+                <button onClick={() => navigate('/facilities')} style={{ backgroundColor: '#0d6efd', color: 'white', border: 'none', padding: '12px 24px', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold', boxShadow: '0 4px 6px rgba(13, 110, 253, 0.2)' }}>
+                    Manage Resources &rarr;
+                </button>
+            </div>
+            
+            {/* --- 1. CORE METRICS ROW --- */}
+            <h3 style={{ color: '#495057', fontSize: '16px', textTransform: 'uppercase', marginBottom: '15px', paddingBottom: '10px', borderBottom: '2px solid #e9ecef' }}>Facility Health & System Volume</h3>
             <div style={{ display: 'flex', gap: '20px', marginBottom: '40px', flexWrap: 'wrap' }}>
+                
                 <div style={cardStyle}>
-                    <h3 style={{ margin: 0, color: '#6c757d', fontSize: '16px' }}>Total Resources</h3>
-                    <p style={{ fontSize: '42px', fontWeight: 'bold', color: '#084298', margin: '10px 0 0 0' }}>{stats.totalFacilities}</p>
+                    <h3 style={{ margin: 0, color: '#6c757d', fontSize: '14px', textTransform: 'uppercase' }}>Active Resources</h3>
+                    <p style={{ fontSize: '42px', fontWeight: '800', color: '#198754', margin: '10px 0 0 0' }}>{facilityStats.active}</p>
                 </div>
                 <div style={cardStyle}>
-                    <h3 style={{ margin: 0, color: '#6c757d', fontSize: '16px' }}>Active & Available</h3>
-                    <p style={{ fontSize: '42px', fontWeight: 'bold', color: '#198754', margin: '10px 0 0 0' }}>{stats.activeFacilities}</p>
+                    <h3 style={{ margin: 0, color: '#6c757d', fontSize: '14px', textTransform: 'uppercase' }}>In Maintenance</h3>
+                    <p style={{ fontSize: '42px', fontWeight: '800', color: '#dc3545', margin: '10px 0 0 0' }}>{facilityStats.maintenance}</p>
                 </div>
-                <div style={cardStyle}>
-                    <h3 style={{ margin: 0, color: '#6c757d', fontSize: '16px' }}>In Maintenance</h3>
-                    <p style={{ fontSize: '42px', fontWeight: 'bold', color: '#dc3545', margin: '10px 0 0 0' }}>{stats.maintenanceFacilities}</p>
+                
+                <div style={{ ...cardStyle, border: '1px solid #0d6efd', backgroundColor: '#f0f4fb' }}>
+                    <h3 style={{ margin: 0, color: '#084298', fontSize: '14px', textTransform: 'uppercase' }}>Total Bookings Requested</h3>
+                    <p style={{ fontSize: '42px', fontWeight: '800', color: '#084298', margin: '10px 0 0 0' }}>{bookingAnalytics?.totalBookings || 0}</p>
                 </div>
             </div>
 
-            <div style={{ backgroundColor: 'white', padding: '30px', borderRadius: '10px', border: '1px solid #cfe2ff', boxShadow: '0 4px 6px rgba(0,0,0,0.05)' }}>
-                <h3 style={{ color: '#084298', marginTop: 0 }}>Quick Actions</h3>
-                <p style={{ color: '#6c757d', marginBottom: '20px' }}>Need to add a new lab or update a broken projector?</p>
-                <button onClick={() => navigate('/facilities')} style={{ backgroundColor: '#0d6efd', color: 'white', border: 'none', padding: '12px 24px', borderRadius: '5px', cursor: 'pointer', fontWeight: 'bold' }}>
-                    Manage Resources Directory &rarr;
-                </button>
+            {/* --- 2. USAGE ANALYTICS CHARTS --- */}
+            <h3 style={{ color: '#495057', fontSize: '16px', textTransform: 'uppercase', marginBottom: '15px', paddingBottom: '10px', borderBottom: '2px solid #e9ecef' }}>Usage Trends & Analytics</h3>
+            
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '30px' }}>
+                
+                {/* --- TOP RESOURCES CHART --- */}
+                <div style={{ backgroundColor: 'white', padding: '30px', borderRadius: '12px', border: '1px solid #dee2e6', boxShadow: '0 4px 10px rgba(0,0,0,0.05)' }}>
+                    <h3 style={{ marginTop: 0, color: '#212529', marginBottom: '25px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <span style={{ fontSize: '24px' }}>🏆</span> Top Booked Resources
+                    </h3>
+                    
+                    {!bookingAnalytics || Object.keys(bookingAnalytics.topFacilities).length === 0 ? (
+                        <p style={{ color: '#6c757d', fontStyle: 'italic', textAlign: 'center', padding: '20px 0' }}>Not enough booking data generated yet.</p>
+                    ) : (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                            {Object.entries(bookingAnalytics.topFacilities).map(([name, count]) => {
+                                const percentage = Math.max((count / maxFacilityBookings) * 100, 5); 
+                                return (
+                                    <div key={name}>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px', marginBottom: '6px', fontWeight: 'bold', color: '#495057' }}>
+                                            <span>{name}</span>
+                                            <span style={{ color: '#0d6efd' }}>{count} requests</span>
+                                        </div>
+                                        <div style={{ width: '100%', backgroundColor: '#e9ecef', borderRadius: '6px', height: '14px', overflow: 'hidden' }}>
+                                            <div style={{ width: `${percentage}%`, backgroundColor: '#0d6efd', height: '100%', borderRadius: '6px', transition: 'width 1s ease-out' }}></div>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    )}
+                </div>
+
+                {/* --- PEAK HOURS CHART --- */}
+                <div style={{ backgroundColor: 'white', padding: '30px', borderRadius: '12px', border: '1px solid #dee2e6', boxShadow: '0 4px 10px rgba(0,0,0,0.05)' }}>
+                    <h3 style={{ marginTop: 0, color: '#212529', marginBottom: '25px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <span style={{ fontSize: '24px' }}>🔥</span> Peak Booking Hours
+                    </h3>
+                    
+                    {!bookingAnalytics || Object.keys(bookingAnalytics.peakHours).length === 0 ? (
+                        <p style={{ color: '#6c757d', fontStyle: 'italic', textAlign: 'center', padding: '20px 0' }}>Not enough booking data generated yet.</p>
+                    ) : (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                            {Object.entries(bookingAnalytics.peakHours).map(([time, count]) => {
+                                const percentage = Math.max((count / maxHourBookings) * 100, 5);
+                                return (
+                                    <div key={time}>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px', marginBottom: '6px', fontWeight: 'bold', color: '#495057' }}>
+                                            <span>{time}</span>
+                                            <span style={{ color: '#fd7e14' }}>{count} requests</span>
+                                        </div>
+                                        <div style={{ width: '100%', backgroundColor: '#e9ecef', borderRadius: '6px', height: '14px', overflow: 'hidden' }}>
+                                            <div style={{ width: `${percentage}%`, backgroundColor: '#fd7e14', height: '100%', borderRadius: '6px', transition: 'width 1s ease-out' }}></div>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    )}
+                </div>
+
             </div>
         </div>
     );
