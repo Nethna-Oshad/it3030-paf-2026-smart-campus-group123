@@ -3,7 +3,6 @@ import { useNavigate, useParams } from 'react-router-dom';
 import facilityService from '../../services/facilityService';
 import bookingService from '../../services/bookingService';
 import { AuthContext } from '../../context/AuthContext';
-import { QRCodeSVG } from 'qrcode.react';
 
 const FacilityDetails = () => {
     const { id } = useParams();
@@ -150,23 +149,12 @@ const FacilityDetails = () => {
                 )}
 
                 <div style={{ padding: '30px' }}>
-                    {/* HEADER WITH QR */}
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '10px' }}>
-                        <div>
-                            <h2 style={{ margin: 0, color: '#084298', fontSize: '28px' }}>{facility.name}</h2>
-                            <span style={{ fontSize: '14px', padding: '6px 12px', borderRadius: '20px', backgroundColor: facility.status === 'ACTIVE' ? '#d1e7dd' : '#f8d7da', color: facility.status === 'ACTIVE' ? '#0f5132' : '#842029', fontWeight: 'bold' }}>
-                                {facility.status}
-                            </span>
-                        </div>
-                        <div style={{ textAlign: 'center' }}>
-                            <QRCodeSVG
-                                value={`${window.location.origin}/incidents/new?resourceId=${facility.id}`}
-                                size={80}
-                            />
-                            <p style={{ fontSize: '10px', margin: '5px 0 0 0' }}>
-                                Scan to report incident
-                            </p>
-                        </div>
+                    {/* HEADER */}
+                    <div style={{ marginBottom: '15px' }}>
+                        <h2 style={{ margin: '0 0 10px 0', color: '#084298', fontSize: '28px' }}>{facility.name}</h2>
+                        <span style={{ fontSize: '14px', padding: '6px 12px', borderRadius: '20px', backgroundColor: facility.status === 'ACTIVE' ? '#d1e7dd' : '#f8d7da', color: facility.status === 'ACTIVE' ? '#0f5132' : '#842029', fontWeight: 'bold' }}>
+                            {facility.status}
+                        </span>
                     </div>
 
                     <p style={{ margin: '0 0 20px 0', color: '#6c757d', fontSize: '16px' }}>📍 {facility.location}</p>

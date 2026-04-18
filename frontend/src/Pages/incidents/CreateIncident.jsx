@@ -9,7 +9,7 @@ const CreateIncident = () => {
   const [searchParams] = useSearchParams();
   const { user } = useContext(AuthContext);
   const [facilities, setFacilities] = useState([]);
-  
+
   const [formData, setFormData] = useState({
     resourceId: searchParams.get('resourceId') || '',
     category: '',
@@ -18,7 +18,7 @@ const CreateIncident = () => {
     contactDetails: '',
     attachmentUrls: []
   });
-  
+
   const [images, setImages] = useState([null, null, null]);
   const [uploading, setUploading] = useState(false);
 
@@ -59,10 +59,10 @@ const CreateIncident = () => {
         }
       }
 
-      await createIncident({ 
-        ...formData, 
+      await createIncident({
+        ...formData,
         attachmentUrls: uploadedUrls,
-        reportedByUserId: user ? user.username : 'Anonymous'
+        reportedByUserId: user ? (user.name || user.email || 'Anonymous') : 'Anonymous'
       });
       alert('Ticket Created Successfully');
       navigate('/incidents');
@@ -116,15 +116,15 @@ const CreateIncident = () => {
                 {images[index] ? (
                   <>
                     <img src={URL.createObjectURL(images[index])} alt={`Upload ${index + 1}`} className="w-full h-full object-cover" />
-                    <button 
-                       type="button"
-                       onClick={(e) => {
-                         e.preventDefault();
-                         const newImages = [...images];
-                         newImages[index] = null;
-                         setImages(newImages);
-                       }}
-                       className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity"
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        const newImages = [...images];
+                        newImages[index] = null;
+                        setImages(newImages);
+                      }}
+                      className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity"
                     >
                       &times;
                     </button>
@@ -138,11 +138,11 @@ const CreateIncident = () => {
                 )}
                 {/* Hidden input - absolutely positioned over the entire box so clicking anywhere triggers it */}
                 {!images[index] && (
-                  <input 
-                    type="file" 
-                    accept="image/*" 
-                    onChange={(e) => handleSlotImageChange(index, e)} 
-                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" 
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => handleSlotImageChange(index, e)}
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                     title={`Upload image ${index + 1}`}
                   />
                 )}

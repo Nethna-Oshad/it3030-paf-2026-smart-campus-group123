@@ -15,7 +15,7 @@ const TicketDetails = () => {
     const [commentText, setCommentText] = useState('');
     const [loading, setLoading] = useState(true);
     const [updating, setUpdating] = useState(false);
-    
+
     // Admin update states
     const [status, setStatus] = useState('');
     const [technicianId, setTechnicianId] = useState('');
@@ -48,7 +48,7 @@ const TicketDetails = () => {
             setTechnicianId(data.technicianId || '');
             setResolutionNotes(data.resolutionNotes || '');
             setRejectedReason(data.rejectedReason || '');
-            
+
             if (data.resourceId) {
                 const facs = await facilityService.getAllFacilities();
                 const matched = facs.find(f => String(f.id) === String(data.resourceId));
@@ -96,23 +96,23 @@ const TicketDetails = () => {
     };
 
     const getStatusColor = (s) => {
-        switch(s) {
-          case 'OPEN': return 'bg-yellow-50 text-yellow-700 border border-yellow-200';
-          case 'IN_PROGRESS': return 'bg-blue-50 text-blue-700 border border-blue-200';
-          case 'RESOLVED': return 'bg-emerald-50 text-emerald-700 border border-emerald-200';
-          case 'CLOSED': return 'bg-gray-50 text-gray-700 border border-gray-200';
-          case 'REJECTED': return 'bg-red-50 text-red-700 border border-red-200';
-          default: return 'bg-gray-50 text-gray-700 border border-gray-200';
+        switch (s) {
+            case 'OPEN': return 'bg-yellow-50 text-yellow-700 border border-yellow-200';
+            case 'IN_PROGRESS': return 'bg-blue-50 text-blue-700 border border-blue-200';
+            case 'RESOLVED': return 'bg-emerald-50 text-emerald-700 border border-emerald-200';
+            case 'CLOSED': return 'bg-gray-50 text-gray-700 border border-gray-200';
+            case 'REJECTED': return 'bg-red-50 text-red-700 border border-red-200';
+            default: return 'bg-gray-50 text-gray-700 border border-gray-200';
         }
     };
 
     const getPriorityColor = (priority) => {
-        switch(priority) {
-          case 'LOW': return 'bg-green-400';
-          case 'MEDIUM': return 'bg-yellow-400';
-          case 'HIGH': return 'bg-orange-500';
-          case 'CRITICAL': return 'bg-red-600';
-          default: return 'bg-gray-300';
+        switch (priority) {
+            case 'LOW': return 'bg-green-400';
+            case 'MEDIUM': return 'bg-yellow-400';
+            case 'HIGH': return 'bg-orange-500';
+            case 'CRITICAL': return 'bg-red-600';
+            default: return 'bg-gray-300';
         }
     };
 
@@ -132,10 +132,10 @@ const TicketDetails = () => {
             <div className="bg-gradient-to-r from-indigo-700 via-purple-800 to-indigo-900 text-white pb-16 pt-12 px-6 shadow-lg relative overflow-hidden">
                 <div className="absolute top-0 right-0 -m-32 w-96 h-96 bg-white/5 rounded-full blur-3xl"></div>
                 <div className="absolute bottom-0 left-0 -m-20 w-72 h-72 bg-purple-400/20 rounded-full blur-3xl"></div>
-                
+
                 <div className="container mx-auto max-w-4xl relative z-10">
-                    <button 
-                        onClick={() => navigate('/incidents')} 
+                    <button
+                        onClick={() => navigate('/incidents')}
                         className="mb-6 bg-white/10 backdrop-blur-md text-white border border-white/20 py-2 px-4 rounded-full hover:bg-white/20 transition flex items-center gap-2 text-sm font-medium"
                     >
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -143,13 +143,29 @@ const TicketDetails = () => {
                         </svg>
                         Back to Tickets
                     </button>
-                    
+
                     <div className="flex flex-col md:flex-row justify-between items-start md:items-center">
                         <div>
-                            <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight mb-2">
-                                Ticket #{ticket.id}
-                            </h1>
-                            <p className="text-indigo-200 text-lg">Detailed view of the reported incident</p>
+                            <div className="flex flex-wrap items-center gap-3 mb-2">
+                                <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight">
+                                    {ticket.category ? `${ticket.category} Report` : 'Incident Details'}
+                                </h1>
+                                <div className="flex items-center gap-1.5 bg-indigo-900/40 backdrop-blur-sm px-3 py-1.5 rounded-lg border border-indigo-400/20" title={`Full ID: ${ticket.id}`}>
+                                    <svg className="w-4 h-4 text-indigo-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14"></path>
+                                    </svg>
+                                    <span className="text-indigo-100 font-mono text-sm tracking-wider font-semibold">
+                                        {ticket.id.slice(-6).toUpperCase()}
+                                    </span>
+                                </div>
+                            </div>
+                            <p className="text-indigo-200 text-lg flex items-center gap-2 mt-1">
+                                <svg className="w-5 h-5 opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                </svg>
+                                {facilityName || ticket.resourceId || 'General Facility'}
+                            </p>
                         </div>
                         <div className="mt-4 md:mt-0 flex items-center gap-3">
                             <span className={`px-4 py-2 text-sm font-bold uppercase rounded-full tracking-wider ${getStatusColor(ticket.status)}`}>
@@ -197,10 +213,10 @@ const TicketDetails = () => {
                                 </div>
                                 <div>
                                     <label className="block text-sm font-bold text-gray-600 mb-1">Created</label>
-                                    <p className="text-gray-800">{ticket.createdAt ? new Date(ticket.createdAt).toLocaleDateString('en-US', { 
-                                        weekday: 'long', 
-                                        year: 'numeric', 
-                                        month: 'long', 
+                                    <p className="text-gray-800">{ticket.createdAt ? new Date(ticket.createdAt).toLocaleDateString('en-US', {
+                                        weekday: 'long',
+                                        year: 'numeric',
+                                        month: 'long',
                                         day: 'numeric',
                                         hour: '2-digit',
                                         minute: '2-digit'
@@ -212,7 +228,7 @@ const TicketDetails = () => {
                                 </div>
                             </div>
                         </div>
-                        
+
                         <div className="border-t border-gray-100 pt-6">
                             <label className="block text-sm font-bold text-gray-600 mb-3">Description</label>
                             <div className="bg-gray-50 rounded-xl p-4 text-gray-800 leading-relaxed">
@@ -228,9 +244,9 @@ const TicketDetails = () => {
                                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                                     {ticket.attachmentUrls.map((url, i) => (
                                         <div key={i} className="relative group">
-                                            <img 
-                                                src={"http://localhost:5173" + url} 
-                                                alt={`Attachment ${i+1}`} 
+                                            <img
+                                                src={"http://localhost:5173" + url}
+                                                alt={`Attachment ${i + 1}`}
                                                 className="w-full h-24 object-cover rounded-lg border border-gray-200 shadow-sm group-hover:shadow-md transition-shadow cursor-pointer"
                                                 onClick={() => window.open("http://localhost:5173" + url, '_blank')}
                                             />
@@ -262,9 +278,9 @@ const TicketDetails = () => {
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
                                     <label className="block text-sm font-bold text-gray-700 mb-2">Status</label>
-                                    <select 
-                                        value={status} 
-                                        onChange={(e) => setStatus(e.target.value)} 
+                                    <select
+                                        value={status}
+                                        onChange={(e) => setStatus(e.target.value)}
                                         className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition font-medium"
                                     >
                                         <option value="OPEN">Open</option>
@@ -276,9 +292,9 @@ const TicketDetails = () => {
                                 </div>
                                 <div>
                                     <label className="block text-sm font-bold text-gray-700 mb-2">Assign Technician</label>
-                                    <select 
-                                        value={technicianId} 
-                                        onChange={(e) => setTechnicianId(e.target.value)} 
+                                    <select
+                                        value={technicianId}
+                                        onChange={(e) => setTechnicianId(e.target.value)}
                                         className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition font-medium"
                                     >
                                         <option value="">-- Select a Technician --</option>
@@ -290,27 +306,27 @@ const TicketDetails = () => {
                                 {status === 'REJECTED' && (
                                     <div className="md:col-span-2">
                                         <label className="block text-sm font-bold text-gray-700 mb-2">Reason for Rejection</label>
-                                        <textarea 
-                                            value={rejectedReason} 
-                                            onChange={(e) => setRejectedReason(e.target.value)} 
-                                            className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition h-24 resize-none" 
+                                        <textarea
+                                            value={rejectedReason}
+                                            onChange={(e) => setRejectedReason(e.target.value)}
+                                            className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition h-24 resize-none"
                                             placeholder="Please provide a reason for rejection..."
                                         />
                                     </div>
                                 )}
                                 <div className="md:col-span-2">
                                     <label className="block text-sm font-bold text-gray-700 mb-2">Resolution Notes</label>
-                                    <textarea 
-                                        value={resolutionNotes} 
-                                        onChange={(e) => setResolutionNotes(e.target.value)} 
-                                        className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition h-32 resize-none" 
+                                    <textarea
+                                        value={resolutionNotes}
+                                        onChange={(e) => setResolutionNotes(e.target.value)}
+                                        className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition h-32 resize-none"
                                         placeholder="Describe the resolution or actions taken..."
                                     />
                                 </div>
                             </div>
                             <div className="mt-6 flex justify-end">
-                                <button 
-                                    onClick={handleUpdateStatus} 
+                                <button
+                                    onClick={handleUpdateStatus}
                                     disabled={updating}
                                     className="bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white px-8 py-3 rounded-xl shadow-lg hover:shadow-xl transition transform hover:-translate-y-0.5 font-bold flex items-center gap-2"
                                 >
@@ -330,9 +346,9 @@ const TicketDetails = () => {
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
                                     <label className="block text-sm font-bold text-gray-700 mb-2">Status</label>
-                                    <select 
-                                        value={status} 
-                                        onChange={(e) => setStatus(e.target.value)} 
+                                    <select
+                                        value={status}
+                                        onChange={(e) => setStatus(e.target.value)}
                                         className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500"
                                     >
                                         <option value="IN_PROGRESS">In Progress</option>
@@ -341,10 +357,10 @@ const TicketDetails = () => {
                                 </div>
                                 <div className="md:col-span-2">
                                     <label className="block text-sm font-bold text-gray-700 mb-2">Resolution Notes</label>
-                                    <textarea 
-                                        value={resolutionNotes} 
-                                        onChange={(e) => setResolutionNotes(e.target.value)} 
-                                        className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl h-32 resize-none" 
+                                    <textarea
+                                        value={resolutionNotes}
+                                        onChange={(e) => setResolutionNotes(e.target.value)}
+                                        className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl h-32 resize-none"
                                         placeholder="Describe actions taken..."
                                     />
                                 </div>
@@ -361,10 +377,10 @@ const TicketDetails = () => {
                 {/* Updates for Users */}
                 {(ticket.resolutionNotes || ticket.technicianId || ticket.rejectedReason) && (!user || user.role !== 'ADMIN') && (
                     <div className="bg-yellow-50/80 backdrop-blur-xl rounded-2xl shadow-sm border border-yellow-200 mb-8 p-8">
-                         <h3 className="text-xl font-bold mb-4">Updates</h3>
-                         {ticket.technicianId && <p className="mb-2"><strong>Assigned Technician:</strong> {ticket.technicianId}</p>}
-                         {ticket.resolutionNotes && <p className="mb-2"><strong>Resolution:</strong> {ticket.resolutionNotes}</p>}
-                         {ticket.rejectedReason && <p className="text-red-700"><strong>Rejection Reason:</strong> {ticket.rejectedReason}</p>}
+                        <h3 className="text-xl font-bold mb-4">Updates</h3>
+                        {ticket.technicianId && <p className="mb-2"><strong>Assigned Technician:</strong> {ticket.technicianId}</p>}
+                        {ticket.resolutionNotes && <p className="mb-2"><strong>Resolution:</strong> {ticket.resolutionNotes}</p>}
+                        {ticket.rejectedReason && <p className="text-red-700"><strong>Rejection Reason:</strong> {ticket.rejectedReason}</p>}
                     </div>
                 )}
 
@@ -389,10 +405,10 @@ const TicketDetails = () => {
 
                     {user && (
                         <div className="flex flex-col gap-4">
-                            <textarea 
-                                value={commentText} 
+                            <textarea
+                                value={commentText}
                                 onChange={(e) => setCommentText(e.target.value)}
-                                placeholder="Add a comment... (Markdown supported)" 
+                                placeholder="Add a comment... (Markdown supported)"
                                 className="p-4 bg-gray-50 border border-gray-200 rounded-xl h-32 resize-none focus:ring-2 focus:ring-indigo-500 outline-none"
                             />
                             <button onClick={handleAddComment} className="bg-indigo-600 text-white px-6 py-3 rounded-xl font-bold self-end">Post Comment</button>
