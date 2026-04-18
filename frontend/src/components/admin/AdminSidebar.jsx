@@ -16,7 +16,8 @@ const AdminSidebar = () => {
                 <div onClick={() => navigate('/admin/dashboard')} style={{ ...linkStyle, backgroundColor: 'rgba(255,255,255,0.1)' }}>Dashboard</div>
                 <div onClick={() => navigate('/facilities')} style={{ ...linkStyle }}>Manage Facilities</div>
                 <div style={{ ...linkStyle }}>All Bookings</div>
-                <div style={{ ...linkStyle }}>Maintenance Tickets</div>
+                {/* Added Navigation to Maintenance Tickets Here */}
+                <div onClick={() => navigate('/incidents')} style={{ ...linkStyle }}>Maintenance Tickets</div>
                 <div style={{ ...linkStyle }}>User Management</div>
             </div>
 

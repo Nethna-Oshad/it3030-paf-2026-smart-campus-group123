@@ -1,5 +1,5 @@
 package com.sliit.smartcampus.modules.incident.model.enums;
 
-public class TicketPriority {
-    
+public enum TicketPriority {
+    LOW, MEDIUM, HIGH, CRITICAL
 }

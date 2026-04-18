@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import facilityService from '../../services/facilityService';
+import { QRCodeSVG } from 'qrcode.react';
 
 const FacilityDetails = () => {
     const { id } = useParams();
@@ -67,11 +68,17 @@ const FacilityDetails = () => {
                 )}
 
                 <div style={{ padding: '20px' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-                        <h2 style={{ margin: 0, color: '#084298' }}>{facility.name}</h2>
-                        <span style={{ fontSize: '12px', padding: '4px 10px', borderRadius: '12px', backgroundColor: facility.status === 'ACTIVE' ? '#d1e7dd' : '#f8d7da', color: facility.status === 'ACTIVE' ? '#0f5132' : '#842029', fontWeight: 'bold' }}>
-                            {facility.status}
-                        </span>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '10px' }}>
+                        <div>
+                            <h2 style={{ margin: 0, color: '#084298' }}>{facility.name}</h2>
+                            <span style={{ display: 'inline-block', marginTop: '8px', fontSize: '12px', padding: '4px 10px', borderRadius: '12px', backgroundColor: facility.status === 'ACTIVE' ? '#d1e7dd' : '#f8d7da', color: facility.status === 'ACTIVE' ? '#0f5132' : '#842029', fontWeight: 'bold' }}>
+                                {facility.status}
+                            </span>
+                        </div>
+                        <div style={{ textAlign: 'center' }}>
+                            <QRCodeSVG value={`http://localhost:5173/incidents/new?resourceId=${facility.id}`} size={80} />
+                            <p style={{ fontSize: '10px', color: '#6c757d', marginTop: '4px', margin: 0 }}>Scan to report incident</p>
+                        </div>
                     </div>
 
                     <p style={{ marginTop: 0, color: '#6c757d' }}>{facility.location}</p>

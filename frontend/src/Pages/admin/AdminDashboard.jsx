@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import facilityService from '../../services/facilityService';
+import { getIncidentAnalytics } from '../../services/incidentService';
 
 const AdminDashboard = () => {
     const navigate = useNavigate();
@@ -9,7 +10,12 @@ const AdminDashboard = () => {
     const [stats, setStats] = useState({
         totalFacilities: 0,
         activeFacilities: 0,
-        maintenanceFacilities: 0
+        maintenanceFacilities: 0,
+        incidentSla: {
+            avgHoursToResolve: 0,
+            activeTickets: 0,
+            totalTickets: 0
+        }
     });
     const [loading, setLoading] = useState(true);
 
@@ -18,6 +24,7 @@ const AdminDashboard = () => {
             try {
                 // Fetch all your real data from Spring Boot!
                 const data = await facilityService.getAllFacilities();
+                const analytics = await getIncidentAnalytics();
                 
                 // Calculate the statistics
                 const active = data.filter(fac => fac.status === 'ACTIVE').length;
@@ -26,7 +33,8 @@ const AdminDashboard = () => {
                 setStats({
                     totalFacilities: data.length,
                     activeFacilities: active,
-                    maintenanceFacilities: maintenance
+                    maintenanceFacilities: maintenance,
+                    incidentSla: analytics
                 });
             } catch (error) {
                 console.error("Error loading dashboard data:", error);
@@ -47,7 +55,7 @@ const AdminDashboard = () => {
             <h1 style={{ color: '#084298', marginBottom: '10px' }}>Admin Overview</h1>
             <p style={{ color: '#6c757d', marginBottom: '30px' }}>Live statistics from your Campus Nexus database.</p>
             
-            <div style={{ display: 'flex', gap: '20px', marginBottom: '40px', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', gap: '20px', marginBottom: '20px', flexWrap: 'wrap' }}>
                 <div style={cardStyle}>
                     <h3 style={{ margin: 0, color: '#6c757d', fontSize: '16px' }}>Total Resources</h3>
                     <p style={{ fontSize: '42px', fontWeight: 'bold', color: '#084298', margin: '10px 0 0 0' }}>{stats.totalFacilities}</p>
@@ -59,6 +67,23 @@ const AdminDashboard = () => {
                 <div style={cardStyle}>
                     <h3 style={{ margin: 0, color: '#6c757d', fontSize: '16px' }}>In Maintenance</h3>
                     <p style={{ fontSize: '42px', fontWeight: 'bold', color: '#dc3545', margin: '10px 0 0 0' }}>{stats.maintenanceFacilities}</p>
+                </div>
+            </div>
+
+            {/* SLA DASHBOARD */}
+            <h2 style={{ color: '#084298', marginBottom: '10px' }}>Ticketing SLAs</h2>
+            <div style={{ display: 'flex', gap: '20px', marginBottom: '40px', flexWrap: 'wrap' }}>
+                <div style={{ ...cardStyle, borderLeft: '4px solid #ffc107' }}>
+                    <h3 style={{ margin: 0, color: '#6c757d', fontSize: '16px' }}>Active Incident Tickets</h3>
+                    <p style={{ fontSize: '42px', fontWeight: 'bold', color: '#084298', margin: '10px 0 0 0' }}>{stats.incidentSla.activeTickets}</p>
+                </div>
+                <div style={{ ...cardStyle, borderLeft: '4px solid #0dcaf0' }}>
+                    <h3 style={{ margin: 0, color: '#6c757d', fontSize: '16px' }}>Avg MTTR (Hours)</h3>
+                    <p style={{ fontSize: '42px', fontWeight: 'bold', color: '#198754', margin: '10px 0 0 0' }}>{stats.incidentSla.avgHoursToResolve}h</p>
+                </div>
+                <div style={{ ...cardStyle, borderLeft: '4px solid #6c757d' }}>
+                    <h3 style={{ margin: 0, color: '#6c757d', fontSize: '16px' }}>Total Lifetime Tickets</h3>
+                    <p style={{ fontSize: '42px', fontWeight: 'bold', color: '#6c757d', margin: '10px 0 0 0' }}>{stats.incidentSla.totalTickets}</p>
                 </div>
             </div>
 
