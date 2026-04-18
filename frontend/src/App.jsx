@@ -7,30 +7,30 @@ import Footer from './components/common/Footer';
 
 // --- ADMIN ---
 import AdminSidebar from './components/admin/AdminSidebar';
-import AdminDashboard from './Pages/admin/AdminDashboard';
-import AdminBookings from './Pages/bookings/AdminBookings';
+import AdminDashboard from './pages/admin/AdminDashboard'; // LOWERCASE pages
+import AdminBookings from './pages/bookings/AdminBookings'; // LOWERCASE pages
 
 // --- TECHNICIAN ---
 import TechnicianSidebar from './components/technician/TechnicianSidebar';
-import TechnicianDashboard from './Pages/technician/TechnicianDashboard';
+import TechnicianDashboard from './pages/technician/TechnicianDashboard'; // LOWERCASE pages
 
 // --- STUDENT ---
 import StudentNavbar from './components/student/StudentNavbar';
-import HomePage from './Pages/student/HomePage';
-import StudentBookings from './Pages/bookings/StudentBookings';
+import HomePage from './pages/student/HomePage'; // LOWERCASE pages
+import StudentBookings from './pages/bookings/StudentBookings'; // LOWERCASE pages
 
 // --- FACILITIES ---
-import FacilitiesCatalogue from './Pages/facilities/FacilitiesCatalogue';
-import FacilityDetails from './Pages/facilities/FacilityDetails';
+import FacilitiesCatalogue from './pages/facilities/FacilitiesCatalogue'; // LOWERCASE pages
+import FacilityDetails from './pages/facilities/FacilityDetails'; // LOWERCASE pages
 
 // --- INCIDENTS ---
-import IncidentList from './Pages/incidents/IncidentList';
-import CreateIncident from './Pages/incidents/CreateIncident';
-import TicketDetails from './Pages/incidents/TicketDetails';
+import IncidentList from './pages/incidents/IncidentList'; // LOWERCASE pages
+import CreateIncident from './pages/incidents/CreateIncident'; // LOWERCASE pages
+import TicketDetails from './pages/incidents/TicketDetails'; // LOWERCASE pages
 
 // --- AUTH ---
-import LoginPage from './Pages/auth/LoginPage';
-import RegisterPage from './Pages/auth/RegisterPage';
+import LoginPage from './pages/auth/LoginPage'; // LOWERCASE pages
+import RegisterPage from './pages/auth/RegisterPage'; // LOWERCASE pages
 
 const AppRoutes = () => {
   const { user, loading } = useContext(AuthContext);
@@ -42,8 +42,6 @@ const AppRoutes = () => {
   // ==========================================
   // 1. ADMIN LAYOUT (Sidebar + Dashboard)
   // ==========================================
-
-  // ADMIN
   if (user && user.role === 'ADMIN') {
     return (
       <div style={{ display: 'flex', minHeight: '100vh', backgroundColor: '#f4f7f6' }}>
@@ -98,7 +96,6 @@ const AppRoutes = () => {
   // ==========================================
   // 2. PUBLIC & STUDENT LAYOUT (Top Navbar + Home)
   // ==========================================
-  // STUDENT / PUBLIC
   return (
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', backgroundColor: '#f4f7f6' }}>
       <StudentNavbar />
@@ -113,17 +110,16 @@ const AppRoutes = () => {
           {/* Protected Route: Only logged-in students can see their bookings */}
           <Route path="/my-bookings" element={user ? <StudentBookings /> : <Navigate to="/login" />} />
           
+          {/* Protected Incident Routes */}
+          <Route path="/incidents" element={user ? <IncidentList /> : <Navigate to="/login" />} />
+          <Route path="/incidents/new" element={user ? <CreateIncident /> : <Navigate to="/login" />} />
+          <Route path="/incidents/:id" element={user ? <TicketDetails /> : <Navigate to="/login" />} />
+
           {/* Auth Routes */}
-
-          <Route path="/incidents" element={<IncidentList />} />
-          <Route path="/incidents/new" element={<CreateIncident />} />
-          <Route path="/incidents/:id" element={<TicketDetails />} />
-
           <Route path="/login" element={!user ? <LoginPage /> : <Navigate to="/" />} />
           <Route path="/register" element={!user ? <RegisterPage /> : <Navigate to="/" />} />
           
           {/* Catch-all route */}
-
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       </main>
