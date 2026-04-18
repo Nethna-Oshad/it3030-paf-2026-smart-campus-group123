@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import com.sliit.smartcampus.common.enums.BookingStatus;
 import com.sliit.smartcampus.modules.booking.model.Booking;
 import com.sliit.smartcampus.modules.booking.repository.BookingRepository;
+import com.sliit.smartcampus.modules.notification.service.NotificationService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -15,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 public class BookingService {
 
     private final BookingRepository bookingRepository;
+    private final NotificationService notificationService; // <-- Injecting Notification logic here
 
     public Booking createBooking(Booking booking) {
         // 1. Check for time conflicts. We only care about APPROVED or PENDING overlapping bookings.
@@ -49,6 +51,15 @@ public class BookingService {
                 .orElseThrow(() -> new RuntimeException("Booking not found"));
         
         booking.setStatus(newStatus);
-        return bookingRepository.save(booking);
+        Booking savedBooking = bookingRepository.save(booking);
+
+        // 3. AUTO-NOTIFICATION LOGIC: Fire a notification if approved or rejected!
+        if (newStatus == BookingStatus.APPROVED || newStatus == BookingStatus.REJECTED) {
+            String title = "Booking " + newStatus.name();
+            String message = "Your request for " + booking.getFacilityName() + " has been " + newStatus.name().toLowerCase() + ".";
+            notificationService.createNotification(booking.getUserId(), title, message);
+        }
+
+        return savedBooking;
     }
 }

@@ -8,13 +8,11 @@ import Footer from './components/common/Footer';
 // --- ADMIN ---
 import AdminSidebar from './components/admin/AdminSidebar';
 import AdminDashboard from './Pages/admin/AdminDashboard';
-import AdminBookings from './Pages/bookings/AdminBookings'; // <-- NEW IMPORT
 import AdminBookings from './Pages/bookings/AdminBookings';
 
 // --- STUDENT ---
 import StudentNavbar from './components/student/StudentNavbar';
 import HomePage from './Pages/student/HomePage';
-import StudentBookings from './Pages/bookings/StudentBookings'; // <-- NEW IMPORT
 import StudentBookings from './Pages/bookings/StudentBookings';
 
 // --- FACILITIES ---
@@ -29,7 +27,6 @@ import TicketDetails from './Pages/incidents/TicketDetails';
 // --- AUTH ---
 import LoginPage from './Pages/auth/LoginPage';
 import RegisterPage from './Pages/auth/RegisterPage';
-import RegisterPage from './Pages/auth/RegisterPage';
 
 const AppRoutes = () => {
   const { user, loading } = useContext(AuthContext);
@@ -41,12 +38,6 @@ const AppRoutes = () => {
   // ==========================================
   // 1. ADMIN LAYOUT (Sidebar + Dashboard)
   // ==========================================
-    return (
-      <div style={{ padding: '50px', textAlign: 'center', color: '#0d6efd', fontWeight: 'bold' }}>
-        Loading Campus Nexus...
-      </div>
-    );
-  }
 
   // ADMIN
   if (user && user.role === 'ADMIN') {
@@ -61,8 +52,6 @@ const AppRoutes = () => {
 
               <Route path="/facilities" element={<FacilitiesCatalogue />} />
               <Route path="/facilities/:id" element={<FacilityDetails />} />
-              <Route path="/admin/bookings" element={<AdminBookings />} /> {/* <-- NEW ROUTE */}
-
               <Route path="/admin/bookings" element={<AdminBookings />} />
 
               <Route path="/incidents" element={<IncidentList />} />
@@ -95,14 +84,9 @@ const AppRoutes = () => {
           <Route path="/facilities/:id" element={<FacilityDetails />} />
           
           {/* Protected Route: Only logged-in students can see their bookings */}
-          <Route path="/my-bookings" element={user ? <StudentBookings /> : <Navigate to="/login" />} /> {/* <-- NEW ROUTE */}
+          <Route path="/my-bookings" element={user ? <StudentBookings /> : <Navigate to="/login" />} />
           
           {/* Auth Routes */}
-
-          <Route
-            path="/my-bookings"
-            element={user ? <StudentBookings /> : <Navigate to="/login" />}
-          />
 
           <Route path="/incidents" element={<IncidentList />} />
           <Route path="/incidents/new" element={<CreateIncident />} />
@@ -112,7 +96,6 @@ const AppRoutes = () => {
           <Route path="/register" element={!user ? <RegisterPage /> : <Navigate to="/" />} />
           
           {/* Catch-all route */}
-          <Route path="/register" element={!user ? <RegisterPage /> : <Navigate to="/" />} />
 
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>

@@ -1,9 +1,6 @@
 import React, { useEffect, useState, useContext } from 'react';
-import React, { useEffect, useState, useContext } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import facilityService from '../../services/facilityService';
-import bookingService from '../../services/bookingService';
-import { AuthContext } from '../../context/AuthContext';
 import bookingService from '../../services/bookingService';
 import { AuthContext } from '../../context/AuthContext';
 import { QRCodeSVG } from 'qrcode.react';
@@ -12,28 +9,10 @@ const FacilityDetails = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     const { user } = useContext(AuthContext);
-    const { user } = useContext(AuthContext);
 
     const [facility, setFacility] = useState(null);
     const [loading, setLoading] = useState(true);
-
-    // --- New State for the Schedule ---
     const [approvedBookings, setApprovedBookings] = useState([]);
-
-    const [showBookingForm, setShowBookingForm] = useState(false);
-    const [isSubmitting, setIsSubmitting] = useState(false);
-    const [bookingMessage, setBookingMessage] = useState({ type: '', text: '' });
-    const [bookingData, setBookingData] = useState({
-        purpose: '',
-        attendees: '',
-        startTime: '',
-        endTime: ''
-    });
-
-    const currentDateTime = new Date().toISOString().slice(0, 16);
-
-    const [approvedBookings, setApprovedBookings] = useState([]);
-
     const [showBookingForm, setShowBookingForm] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [bookingMessage, setBookingMessage] = useState({ type: '', text: '' });
@@ -47,7 +26,6 @@ const FacilityDetails = () => {
     const currentDateTime = new Date().toISOString().slice(0, 16);
 
     useEffect(() => {
-        const loadFacilityData = async () => {
         const loadFacilityData = async () => {
             try {
                 // 1. Load Facility Details
@@ -71,24 +49,7 @@ const FacilityDetails = () => {
                     activeSchedule.sort((a, b) => new Date(a.startTime) - new Date(b.startTime));
                     setApprovedBookings(activeSchedule);
                 }
-
-
-                if (selected) {
-                    const allBookings = await bookingService.getFacilityBookings(selected.id);
-                    const now = new Date();
-
-                    const activeSchedule = allBookings.filter(b => {
-                        const isApproved = b.status === 'APPROVED';
-                        const isFuture = new Date(b.endTime) > now;
-                        return isApproved && isFuture;
-                    });
-
-                    activeSchedule.sort((a, b) => new Date(a.startTime) - new Date(b.startTime));
-                    setApprovedBookings(activeSchedule);
-                }
-
             } catch (error) {
-                console.error('Error loading data:', error);
                 console.error('Error loading data:', error);
                 setFacility(null);
             } finally {
@@ -96,7 +57,6 @@ const FacilityDetails = () => {
             }
         };
 
-        loadFacilityData();
         loadFacilityData();
     }, [id]);
 
@@ -149,59 +109,6 @@ const FacilityDetails = () => {
         }
     };
 
-    const handleFormChange = (e) => {
-        setBookingData({ ...bookingData, [e.target.name]: e.target.value });
-    };
-
-    const handleBookingSubmit = async (e) => {
-        e.preventDefault();
-        setBookingMessage({ type: '', text: '' });
-
-        if (!user) {
-            setBookingMessage({ type: 'error', text: 'You must be logged in to book a facility.' });
-            return;
-        }
-
-        if (new Date(bookingData.startTime) >= new Date(bookingData.endTime)) {
-            setBookingMessage({ type: 'error', text: 'End time must be after start time.' });
-            return;
-        }
-
-        setIsSubmitting(true);
-
-        try {
-            const payload = {
-                facilityId: facility.id,
-                facilityName: facility.name,
-                userId: user.id,
-                userName: user.name,
-                purpose: bookingData.purpose,
-                attendees: parseInt(bookingData.attendees),
-                startTime: bookingData.startTime,
-                endTime: bookingData.endTime
-            };
-
-            await bookingService.createBooking(payload);
-
-            setBookingMessage({
-                type: 'success',
-                text: 'Booking request submitted successfully! An Admin will review it shortly.'
-            });
-
-            setShowBookingForm(false);
-            setBookingData({ purpose: '', attendees: '', startTime: '', endTime: '' });
-
-        } catch (error) {
-            console.error(error);
-            setBookingMessage({
-                type: 'error',
-                text: error.response?.data || 'Failed to submit booking. This time slot might already be taken.'
-            });
-        } finally {
-            setIsSubmitting(false);
-        }
-    };
-
     if (loading) {
         return <div style={{ textAlign: 'center', padding: '50px', color: '#0d6efd' }}>Loading facility details...</div>;
     }
@@ -210,7 +117,6 @@ const FacilityDetails = () => {
         return (
             <div style={{ maxWidth: '900px', margin: '0 auto', padding: '20px', fontFamily: 'sans-serif' }}>
                 <button onClick={() => navigate('/facilities')} style={{ marginBottom: '16px', backgroundColor: '#f8f9fa', border: '1px solid #dee2e6', padding: '8px 12px', borderRadius: '5px', cursor: 'pointer' }}>
-                <button onClick={() => navigate('/facilities')} style={{ marginBottom: '16px' }}>
                     Back to Facilities
                 </button>
                 <div>Facility not found.</div>
@@ -218,69 +124,62 @@ const FacilityDetails = () => {
         );
     }
 
-    const inputStyle = { width: '100%', padding: '10px', marginBottom: '15px', borderRadius: '6px', border: '1px solid #ccc', boxSizing: 'border-box', fontFamily: 'sans-serif' };
-
     const inputStyle = {
         width: '100%',
         padding: '10px',
         marginBottom: '15px',
         borderRadius: '6px',
-        border: '1px solid #ccc'
+        border: '1px solid #ccc',
+        boxSizing: 'border-box',
+        fontFamily: 'sans-serif'
     };
 
     return (
         <div style={{ maxWidth: '900px', margin: '0 auto', padding: '20px', fontFamily: 'sans-serif' }}>
             <button onClick={() => navigate('/facilities')} style={{ marginBottom: '16px', backgroundColor: '#f8f9fa', border: '1px solid #dee2e6', padding: '8px 12px', borderRadius: '5px', cursor: 'pointer', fontWeight: 'bold', color: '#495057' }}>
                 &larr; Back to Facilities
-            <button onClick={() => navigate('/facilities')} style={{ marginBottom: '16px' }}>
-                ← Back to Facilities
             </button>
 
             <div style={{ border: '1px solid #cfe2ff', borderRadius: '10px', overflow: 'hidden', backgroundColor: 'white' }}>
-
                 {facility.imageUrl ? (
-                    <img src={facility.imageUrl} alt={facility.name} style={{ width: '100%', maxHeight: '350px', objectFit: 'cover', borderBottom: '1px solid #cfe2ff' }} />
                     <img src={facility.imageUrl} alt={facility.name} style={{ width: '100%', maxHeight: '350px', objectFit: 'cover' }} />
                 ) : (
-                    <div style={{ height: '240px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <div style={{ height: '240px', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#f8f9fa' }}>
                         {facility.type}
                     </div>
                 )}
 
                 <div style={{ padding: '30px' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-                        <h2 style={{ margin: 0, color: '#084298', fontSize: '28px' }}>{facility.name}</h2>
-                        <span style={{ fontSize: '14px', padding: '6px 12px', borderRadius: '20px', backgroundColor: facility.status === 'ACTIVE' ? '#d1e7dd' : '#f8d7da', color: facility.status === 'ACTIVE' ? '#0f5132' : '#842029', fontWeight: 'bold' }}>
-                            {facility.status}
-                        </span>
-                    </div>
-
-                    <p style={{ margin: '0 0 20px 0', color: '#6c757d', fontSize: '16px' }}>📍 {facility.location}</p>
-
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '15px', marginBottom: '30px' }}>
-                        <div style={{ backgroundColor: '#f8f9fa', borderRadius: '8px', padding: '15px', border: '1px solid #e9ecef' }}>
-                            <div style={{ color: '#6c757d', fontSize: '12px', textTransform: 'uppercase', fontWeight: 'bold' }}>Type</div>
-                            <div style={{ fontWeight: 'bold', fontSize: '16px', color: '#212529' }}>{facility.type || 'N/A'}</div>
-                <div style={{ padding: '30px' }}>
-
                     {/* HEADER WITH QR */}
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '10px' }}>
                         <div>
-                            <h2>{facility.name}</h2>
-                            <span>{facility.status}</span>
+                            <h2 style={{ margin: 0, color: '#084298', fontSize: '28px' }}>{facility.name}</h2>
+                            <span style={{ fontSize: '14px', padding: '6px 12px', borderRadius: '20px', backgroundColor: facility.status === 'ACTIVE' ? '#d1e7dd' : '#f8d7da', color: facility.status === 'ACTIVE' ? '#0f5132' : '#842029', fontWeight: 'bold' }}>
+                                {facility.status}
+                            </span>
                         </div>
-                        <div style={{ backgroundColor: '#f8f9fa', borderRadius: '8px', padding: '15px', border: '1px solid #e9ecef' }}>
-                            <div style={{ color: '#6c757d', fontSize: '12px', textTransform: 'uppercase', fontWeight: 'bold' }}>Capacity</div>
-                            <div style={{ fontWeight: 'bold', fontSize: '16px', color: '#212529' }}>{facility.capacity > 0 ? facility.capacity : 'N/A'}</div>
-
                         <div style={{ textAlign: 'center' }}>
                             <QRCodeSVG
                                 value={`${window.location.origin}/incidents/new?resourceId=${facility.id}`}
                                 size={80}
                             />
-                            <p style={{ fontSize: '10px' }}>
+                            <p style={{ fontSize: '10px', margin: '5px 0 0 0' }}>
                                 Scan to report incident
                             </p>
+                        </div>
+                    </div>
+
+                    <p style={{ margin: '0 0 20px 0', color: '#6c757d', fontSize: '16px' }}>📍 {facility.location}</p>
+
+                    {/* DETAILS */}
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '15px', marginBottom: '30px' }}>
+                        <div style={{ backgroundColor: '#f8f9fa', borderRadius: '8px', padding: '15px', border: '1px solid #e9ecef' }}>
+                            <div style={{ color: '#6c757d', fontSize: '12px', textTransform: 'uppercase', fontWeight: 'bold' }}>Type</div>
+                            <div style={{ fontWeight: 'bold', fontSize: '16px', color: '#212529' }}>{facility.type || 'N/A'}</div>
+                        </div>
+                        <div style={{ backgroundColor: '#f8f9fa', borderRadius: '8px', padding: '15px', border: '1px solid #e9ecef' }}>
+                            <div style={{ color: '#6c757d', fontSize: '12px', textTransform: 'uppercase', fontWeight: 'bold' }}>Capacity</div>
+                            <div style={{ fontWeight: 'bold', fontSize: '16px', color: '#212529' }}>{facility.capacity > 0 ? facility.capacity : 'N/A'}</div>
                         </div>
                         <div style={{ backgroundColor: '#f8f9fa', borderRadius: '8px', padding: '15px', border: '1px solid #e9ecef' }}>
                             <div style={{ color: '#6c757d', fontSize: '12px', textTransform: 'uppercase', fontWeight: 'bold' }}>Open Time</div>
@@ -292,64 +191,7 @@ const FacilityDetails = () => {
                         </div>
                     </div>
 
-                    <p>📍 {facility.location}</p>
-
-                    {/* DETAILS */}
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '15px' }}>
-                        <div>Type: {facility.type || 'N/A'}</div>
-                        <div>Capacity: {facility.capacity || 'N/A'}</div>
-                        <div>Open: {facility.openTime || 'N/A'}</div>
-                        <div>Close: {facility.closeTime || 'N/A'}</div>
-                    </div>
-
                     {/* SCHEDULE */}
-                    <div style={{ marginTop: '30px' }}>
-                        <h3>Upcoming Schedule</h3>
-
-                        {approvedBookings.length === 0 ? (
-                            <p>No bookings yet.</p>
-                        ) : (
-                            approvedBookings.map(b => (
-                                <div key={b.id}>
-                                    {new Date(b.startTime).toLocaleString()} - {new Date(b.endTime).toLocaleString()}
-                                </div>
-                            ))
-                        )}
-                    </div>
-
-                    {/* BOOKING */}
-                    <div style={{ marginTop: '30px' }}>
-
-                        {bookingMessage.text && <div>{bookingMessage.text}</div>}
-
-                        {!user ? (
-                            <div onClick={() => navigate('/login')}>
-                                Login to book
-                            </div>
-                        ) : !showBookingForm ? (
-                            <button onClick={() => setShowBookingForm(true)}>
-                                Book Now
-                            </button>
-                        ) : (
-                            <form onSubmit={handleBookingSubmit}>
-                                <input name="purpose" placeholder="Purpose" value={bookingData.purpose} onChange={handleFormChange} required />
-                                <input name="attendees" type="number" value={bookingData.attendees} onChange={handleFormChange} required />
-                                <input type="datetime-local" name="startTime" value={bookingData.startTime} onChange={handleFormChange} required />
-                                <input type="datetime-local" name="endTime" value={bookingData.endTime} onChange={handleFormChange} required />
-
-                                <button type="submit" disabled={isSubmitting}>
-                                    {isSubmitting ? 'Submitting...' : 'Submit'}
-                                </button>
-
-                                <button type="button" onClick={() => setShowBookingForm(false)}>
-                                    Cancel
-                                </button>
-                            </form>
-                        )}
-
-                    </div>
-
-                    {/* --- NEW: THE CURRENT SCHEDULE SECTION --- */}
                     <div style={{ backgroundColor: '#f8f9fa', padding: '20px', borderRadius: '10px', border: '1px solid #cfe2ff', marginBottom: '30px' }}>
                         <h3 style={{ marginTop: 0, color: '#084298', fontSize: '18px', borderBottom: '1px solid #cfe2ff', paddingBottom: '10px', marginBottom: '15px' }}>
                             📅 Upcoming Schedule
@@ -380,7 +222,7 @@ const FacilityDetails = () => {
                         )}
                     </div>
 
-                    {/* --- BOOKING SECTION --- */}
+                    {/* BOOKING SECTION */}
                     <div style={{ borderTop: '1px solid #dee2e6', paddingTop: '25px' }}>
                         
                         {bookingMessage.text && (
@@ -452,7 +294,6 @@ const FacilityDetails = () => {
                             </div>
                         )}
                     </div>
-
                 </div>
             </div>
         </div>
