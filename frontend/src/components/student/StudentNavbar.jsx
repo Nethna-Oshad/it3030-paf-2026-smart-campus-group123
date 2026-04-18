@@ -1,6 +1,7 @@
 import React, { useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../../context/AuthContext'; 
+import { AuthContext } from '../../context/AuthContext'; 
 
 const StudentNavbar = () => {
     const { user, logout } = useContext(AuthContext);
@@ -14,6 +15,11 @@ const StudentNavbar = () => {
                 <div style={{ display: 'flex', gap: '20px' }}>
                     <span onClick={() => navigate('/')} style={{ cursor: 'pointer', fontWeight: 'bold', color: '#495057' }}>Home</span>
                     <span onClick={() => navigate('/facilities')} style={{ cursor: 'pointer', fontWeight: 'bold', color: '#495057' }}>Facilities</span>
+                    
+                    {/* --- SHOW "MY BOOKINGS" ONLY IF LOGGED IN --- */}
+                    {user && (
+                        <span onClick={() => navigate('/my-bookings')} style={{ cursor: 'pointer', fontWeight: 'bold', color: '#495057' }}>My Bookings</span>
+                    )}
                     {/* Added Incidents Link Here */}
                     <span onClick={() => navigate('/incidents')} style={{ cursor: 'pointer', fontWeight: 'bold', color: '#495057' }}>Incidents</span>
                 </div>

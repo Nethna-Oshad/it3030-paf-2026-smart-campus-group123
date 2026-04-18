@@ -8,10 +8,12 @@ import Footer from './components/common/Footer';
 // --- IMPORT ADMIN COMPONENTS & PAGES ---
 import AdminSidebar from './components/admin/AdminSidebar';
 import AdminDashboard from './Pages/admin/AdminDashboard';
+import AdminBookings from './Pages/bookings/AdminBookings'; // <-- NEW IMPORT
 
 // --- IMPORT STUDENT COMPONENTS & PAGES ---
 import StudentNavbar from './components/student/StudentNavbar';
 import HomePage from './Pages/student/HomePage';
+import StudentBookings from './Pages/bookings/StudentBookings'; // <-- NEW IMPORT
 
 // --- IMPORT FACILITY PAGES ---
 import FacilitiesCatalogue from './Pages/facilities/FacilitiesCatalogue';
@@ -24,6 +26,7 @@ import TicketDetails from './Pages/incidents/TicketDetails';
 
 // --- IMPORT AUTH PAGES ---
 import LoginPage from './Pages/auth/LoginPage';
+import RegisterPage from './Pages/auth/RegisterPage';
 import RegisterPage from './Pages/auth/RegisterPage';
 
 const AppRoutes = () => {
@@ -46,6 +49,7 @@ const AppRoutes = () => {
               <Route path="/admin/dashboard" element={<AdminDashboard />} />
               <Route path="/facilities" element={<FacilitiesCatalogue />} />
               <Route path="/facilities/:id" element={<FacilityDetails />} />
+              <Route path="/admin/bookings" element={<AdminBookings />} /> {/* <-- NEW ROUTE */}
               
               {/* Admin Incident Routes */}
               <Route path="/incidents" element={<IncidentList />} />
@@ -75,6 +79,9 @@ const AppRoutes = () => {
           <Route path="/facilities" element={<FacilitiesCatalogue />} />
           <Route path="/facilities/:id" element={<FacilityDetails />} />
           
+          {/* Protected Route: Only logged-in students can see their bookings */}
+          <Route path="/my-bookings" element={user ? <StudentBookings /> : <Navigate to="/login" />} /> {/* <-- NEW ROUTE */}
+          
           {/* Incident Routes */}
           <Route path="/incidents" element={<IncidentList />} />
           <Route path="/incidents/new" element={<CreateIncident />} />
@@ -82,6 +89,7 @@ const AppRoutes = () => {
           
           {/* Auth Routes */}
           <Route path="/login" element={!user ? <LoginPage /> : <Navigate to="/" />} />
+          <Route path="/register" element={!user ? <RegisterPage /> : <Navigate to="/" />} />
           <Route path="/register" element={!user ? <RegisterPage /> : <Navigate to="/" />} />
           
           {/* Catch-all route */}
