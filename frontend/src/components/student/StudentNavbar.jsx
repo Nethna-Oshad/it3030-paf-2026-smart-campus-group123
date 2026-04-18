@@ -24,7 +24,7 @@ const StudentNavbar = () => {
         }
     };
 
-    // Load notifications on mount, and handle closing the dropdown when clicking outside
+    // Handle closing the dropdown when clicking outside
     useEffect(() => {
         fetchNotifications();
 
@@ -37,10 +37,54 @@ const StudentNavbar = () => {
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, [user]);
 
-    // Handle clicking a specific notification
-    const handleNotificationClick = async (id) => {
-        await notificationService.markAsRead(id);
-        fetchNotifications(); // Refresh the list to remove the "unread" highlight
+    // --- ENHANCED: HANDLE CLICK TO NAVIGATE TO RELATED PAGE ---
+    const handleNotificationClick = async (notif) => {
+        // 1. Mark as read on the backend
+        if (!notif.read) {
+            await notificationService.markAsRead(notif.id);
+            fetchNotifications();
+        }
+        
+        // 2. Close dropdown
+        setShowDropdown(false);
+
+        // 3. Navigation Logic based on Category
+        switch (notif.category) {
+            case 'BOOKING':
+                // Navigate to My Bookings and pass the booking ID for highlighting
+                navigate('/my-bookings', { state: { highlightId: notif.referenceId } });
+                break;
+            
+            case 'TICKET':
+                // Assuming you have a maintenance/tickets page
+                navigate('/my-tickets', { state: { highlightId: notif.referenceId } });
+                break;
+
+            case 'FACILITY':
+                // Navigate to a specific facility if referenceId exists
+                if (notif.referenceId) {
+                    navigate(`/facilities/${notif.referenceId}`);
+                } else {
+                    navigate('/facilities');
+                }
+                break;
+
+            default:
+                // General notifications stay on current page or go home
+                console.log("General notification clicked");
+                break;
+        }
+    };
+
+    // --- HANDLE DELETE ---
+    const handleDeleteNotification = async (e, id) => {
+        e.stopPropagation(); // Stop navigation from triggering
+        try {
+            await notificationService.deleteNotification(id);
+            fetchNotifications();
+        } catch (error) {
+            console.error("Failed to delete notification", error);
+        }
     };
 
     // Handle "Mark all as read"
@@ -49,11 +93,10 @@ const StudentNavbar = () => {
         fetchNotifications();
     };
 
-    // Count how many notifications are unread to show on the red badge
     const unreadCount = notifications.filter(n => !n.read).length;
 
     return (
-        <nav style={{ backgroundColor: 'white', borderBottom: '1px solid #cfe2ff', padding: '15px 30px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', boxShadow: '0 2px 10px rgba(0,0,0,0.05)', position: 'relative', fontFamily: 'sans-serif' }}>
+        <nav style={{ backgroundColor: 'white', borderBottom: '1px solid #cfe2ff', padding: '15px 30px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', boxShadow: '0 2px 10px rgba(0,0,0,0.05)', position: 'relative', fontFamily: 'sans-serif', zIndex: 1000 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '30px' }}>
                 <h2 onClick={() => navigate('/')} style={{ margin: 0, color: '#084298', cursor: 'pointer', fontWeight: 'bold' }}>Campus Nexus</h2>
                 
@@ -75,7 +118,7 @@ const StudentNavbar = () => {
                         <div 
                             onClick={() => {
                                 setShowDropdown(!showDropdown);
-                                fetchNotifications(); // Refresh data right when they open it
+                                fetchNotifications(); 
                             }} 
                             style={{ cursor: 'pointer', fontSize: '22px', position: 'relative', padding: '5px' }}
                         >
@@ -89,9 +132,17 @@ const StudentNavbar = () => {
 
                         {/* --- THE DROPDOWN PANEL --- */}
                         {showDropdown && (
-                            <div style={{ position: 'absolute', top: '45px', right: '-50px', width: '320px', backgroundColor: 'white', border: '1px solid #cfe2ff', borderRadius: '8px', boxShadow: '0 8px 25px rgba(0,0,0,0.15)', zIndex: 1000, overflow: 'hidden' }}>
+                            <div style={{ position: 'absolute', top: '45px', right: '-50px', width: '350px', backgroundColor: 'white', border: '1px solid #cfe2ff', borderRadius: '8px', boxShadow: '0 8px 25px rgba(0,0,0,0.15)', zIndex: 1001, overflow: 'hidden' }}>
+                                
                                 <div style={{ padding: '12px 15px', backgroundColor: '#f8f9fa', borderBottom: '1px solid #cfe2ff', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                    <h4 style={{ margin: 0, color: '#084298', fontSize: '16px' }}>Notifications</h4>
+                                    <h4 style={{ margin: 0, color: '#084298', fontSize: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                        Notifications
+                                        <span 
+                                            style={{ fontSize: '14px', cursor: 'pointer' }} 
+                                            title="Notification Preferences"
+                                            onClick={(e) => { e.stopPropagation(); alert("Notification Preferences coming soon in Module D settings!"); }}
+                                        >⚙️</span>
+                                    </h4>
                                     {unreadCount > 0 && (
                                         <span onClick={handleMarkAllRead} style={{ fontSize: '12px', color: '#0d6efd', cursor: 'pointer', fontWeight: 'bold' }}>Mark all read</span>
                                     )}
@@ -106,16 +157,45 @@ const StudentNavbar = () => {
                                         notifications.map(notif => (
                                             <div 
                                                 key={notif.id} 
-                                                onClick={() => handleNotificationClick(notif.id)}
-                                                style={{ padding: '15px', borderBottom: '1px solid #e9ecef', backgroundColor: notif.read ? 'white' : '#f0f4fb', cursor: 'pointer', transition: 'background-color 0.2s' }}
+                                                onClick={() => handleNotificationClick(notif)}
+                                                style={{ 
+                                                    padding: '15px', 
+                                                    borderBottom: '1px solid #e9ecef', 
+                                                    backgroundColor: notif.read ? 'white' : '#f0f4fb', 
+                                                    cursor: 'pointer', 
+                                                    transition: 'background-color 0.2s', 
+                                                    position: 'relative' 
+                                                }}
                                             >
-                                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px' }}>
-                                                    <div style={{ fontWeight: 'bold', color: '#212529', fontSize: '14px' }}>{notif.title}</div>
-                                                    {!notif.read && <div style={{ width: '8px', height: '8px', backgroundColor: '#0d6efd', borderRadius: '50%' }}></div>}
+                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '5px' }}>
+                                                    <div style={{ fontWeight: 'bold', color: '#212529', fontSize: '14px', flex: 1, paddingRight: '10px' }}>
+                                                        {notif.title}
+                                                    </div>
+                                                    
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                                        {!notif.read && <div style={{ width: '8px', height: '8px', backgroundColor: '#0d6efd', borderRadius: '50%' }}></div>}
+                                                        
+                                                        {/* --- DELETE BUTTON --- */}
+                                                        <button 
+                                                            onClick={(e) => handleDeleteNotification(e, notif.id)}
+                                                            style={{ background: 'none', border: 'none', color: '#dc3545', cursor: 'pointer', fontSize: '14px', padding: '2px' }}
+                                                            title="Delete Notification"
+                                                        >
+                                                            🗑️
+                                                        </button>
+                                                    </div>
                                                 </div>
-                                                <div style={{ color: '#495057', fontSize: '13px', lineHeight: '1.4', marginBottom: '8px' }}>{notif.message}</div>
-                                                <div style={{ color: '#adb5bd', fontSize: '11px', fontWeight: 'bold' }}>
-                                                    {new Date(notif.createdAt).toLocaleString()}
+                                                
+                                                <div style={{ color: '#495057', fontSize: '13px', lineHeight: '1.4', marginBottom: '8px' }}>
+                                                    {notif.message}
+                                                </div>
+                                                <div style={{ color: '#adb5bd', fontSize: '11px', fontWeight: 'bold', display: 'flex', justifyContent: 'space-between' }}>
+                                                    <span>{new Date(notif.createdAt).toLocaleString()}</span>
+                                                    {notif.category && (
+                                                        <span style={{ color: '#0d6efd', fontSize: '10px', textTransform: 'uppercase' }}>
+                                                            {notif.category}
+                                                        </span>
+                                                    )}
                                                 </div>
                                             </div>
                                         ))
