@@ -29,6 +29,11 @@ public class UserController {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
+    @GetMapping("/technicians")
+    public ResponseEntity<List<User>> getTechnicians() {
+        return ResponseEntity.ok(userRepository.findByRole(Role.TECHNICIAN));
+    }
+
     // 1. UPDATED: This now handles BOTH Google Login and Manual Login users!
     @GetMapping("/me")
     public ResponseEntity<User> getCurrentUser(Authentication authentication) {
@@ -37,17 +42,32 @@ public class UserController {
         }
         
         String email;
+        String name = null;
         if (authentication.getPrincipal() instanceof OAuth2User) {
             // Google User
-            email = ((OAuth2User) authentication.getPrincipal()).getAttribute("email");
+            OAuth2User oauth2User = (OAuth2User) authentication.getPrincipal();
+            email = oauth2User.getAttribute("email");
+            name = oauth2User.getAttribute("name");
         } else {
             // Manual User
             email = authentication.getName(); 
         }
         
-        return userRepository.findByEmail(email)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        Optional<User> existingUser = userRepository.findByEmail(email);
+        if (existingUser.isPresent()) {
+            return ResponseEntity.ok(existingUser.get());
+        }
+        
+        // Auto-register Google Users
+        if (email != null && name != null && authentication.getPrincipal() instanceof OAuth2User) {
+            User newUser = new User();
+            newUser.setEmail(email);
+            newUser.setName(name);
+            newUser.setRole(Role.USER);
+            return ResponseEntity.ok(userRepository.save(newUser));
+        }
+        
+        return ResponseEntity.notFound().build();
     }
 
     @PostMapping("/register")

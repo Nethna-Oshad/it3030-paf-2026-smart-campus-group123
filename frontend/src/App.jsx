@@ -2,26 +2,36 @@ import React, { useContext } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthContext } from './context/AuthContext';
 
-// --- IMPORT SHARED COMPONENTS ---
+// --- SHARED ---
 import Footer from './components/common/Footer';
 
-// --- IMPORT ADMIN COMPONENTS & PAGES ---
+// --- ADMIN ---
 import AdminSidebar from './components/admin/AdminSidebar';
-import AdminDashboard from './Pages/admin/AdminDashboard';
+import AdminDashboard from './pages/admin/AdminDashboard'; // Lowercase
+import AdminBookings from './pages/bookings/AdminBookings'; // Lowercase
 
-// --- IMPORT STUDENT COMPONENTS & PAGES ---
+// --- TECHNICIAN ---
+import TechnicianSidebar from './components/technician/TechnicianSidebar';
+import TechnicianDashboard from './Pages/technician/TechnicianDashboard'; // UPPERCASE P (GitHub Fix)
+
+// --- STUDENT ---
 import StudentNavbar from './components/student/StudentNavbar';
-import HomePage from './Pages/student/HomePage';
+import HomePage from './pages/student/HomePage'; // Lowercase
+import StudentBookings from './Pages/bookings/StudentBookings'; // UPPERCASE P (GitHub Fix)
 
-// --- IMPORT FACILITY PAGES ---
-import FacilitiesCatalogue from './Pages/facilities/FacilitiesCatalogue';
-import FacilityDetails from './Pages/facilities/FacilityDetails';
+// --- FACILITIES ---
+import FacilitiesCatalogue from './pages/facilities/FacilitiesCatalogue'; // Lowercase
+import FacilityDetails from './Pages/facilities/FacilityDetails'; // UPPERCASE P (GitHub Fix)
 
-// --- IMPORT AUTH PAGES ---
-import LoginPage from './Pages/auth/LoginPage';
-import RegisterPage from './Pages/auth/RegisterPage'; // <-- IMPORTED THE NEW REGISTER PAGE
+// --- INCIDENTS ---
+import IncidentList from './Pages/incidents/IncidentList'; // UPPERCASE P (GitHub Fix)
+import CreateIncident from './Pages/incidents/CreateIncident'; // UPPERCASE P (GitHub Fix)
+import TicketDetails from './Pages/incidents/TicketDetails'; // UPPERCASE P (GitHub Fix)
 
-// We create an internal component to handle routing logic cleanly
+// --- AUTH ---
+import LoginPage from './pages/auth/LoginPage'; // Lowercase
+import RegisterPage from './pages/auth/RegisterPage'; // Lowercase
+
 const AppRoutes = () => {
   const { user, loading } = useContext(AuthContext);
 
@@ -32,20 +42,51 @@ const AppRoutes = () => {
   // ==========================================
   // 1. ADMIN LAYOUT (Sidebar + Dashboard)
   // ==========================================
-  // If a user is logged in AND they are an Admin, show the Admin UI.
   if (user && user.role === 'ADMIN') {
     return (
-      <div style={{ display: 'flex', minHeight: '100vh', backgroundColor: '#f4f7f6', fontFamily: 'sans-serif', margin: 0, padding: 0 }}>
+      <div style={{ display: 'flex', minHeight: '100vh', backgroundColor: '#f4f7f6' }}>
         <AdminSidebar />
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', width: 'calc(100% - 250px)' }}>
+
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
           <main style={{ flex: 1, padding: '20px' }}>
             <Routes>
               <Route path="/admin/dashboard" element={<AdminDashboard />} />
+
               <Route path="/facilities" element={<FacilitiesCatalogue />} />
               <Route path="/facilities/:id" element={<FacilityDetails />} />
+              <Route path="/admin/bookings" element={<AdminBookings />} />
+
+              <Route path="/incidents" element={<IncidentList />} />
+              <Route path="/incidents/new" element={<CreateIncident />} />
+              <Route path="/incidents/:id" element={<TicketDetails />} />
+
               <Route path="*" element={<Navigate to="/admin/dashboard" />} />
             </Routes>
           </main>
+
+          <Footer />
+        </div>
+      </div>
+    );
+  }
+
+  // ==========================================
+  // 1.5 TECHNICIAN LAYOUT (Sidebar + Dashboard)
+  // ==========================================
+  if (user && user.role === 'TECHNICIAN') {
+    return (
+      <div style={{ display: 'flex', minHeight: '100vh', backgroundColor: '#f4f7f6' }}>
+        <TechnicianSidebar />
+
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+          <main style={{ flex: 1, padding: '20px' }}>
+            <Routes>
+              <Route path="/technician/dashboard" element={<TechnicianDashboard />} />
+              <Route path="/incidents/:id" element={<TicketDetails />} />
+              <Route path="*" element={<Navigate to="/technician/dashboard" />} />
+            </Routes>
+          </main>
+
           <Footer />
         </div>
       </div>
@@ -55,27 +96,34 @@ const AppRoutes = () => {
   // ==========================================
   // 2. PUBLIC & STUDENT LAYOUT (Top Navbar + Home)
   // ==========================================
-  // This layout is shown to EVERYONE ELSE (Not logged in, or logged in as a normal USER).
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', backgroundColor: '#f4f7f6', fontFamily: 'sans-serif', margin: 0, padding: 0 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', backgroundColor: '#f4f7f6' }}>
       <StudentNavbar />
-      
+
       <main style={{ flex: 1, padding: '30px' }}>
         <Routes>
-          {/* Publicly accessible routes */}
           <Route path="/" element={<HomePage />} />
+
           <Route path="/facilities" element={<FacilitiesCatalogue />} />
           <Route path="/facilities/:id" element={<FacilityDetails />} />
           
+          {/* Protected Route: Only logged-in students can see their bookings */}
+          <Route path="/my-bookings" element={user ? <StudentBookings /> : <Navigate to="/login" />} />
+          
+          {/* Protected Incident Routes */}
+          <Route path="/incidents" element={user ? <IncidentList /> : <Navigate to="/login" />} />
+          <Route path="/incidents/new" element={user ? <CreateIncident /> : <Navigate to="/login" />} />
+          <Route path="/incidents/:id" element={user ? <TicketDetails /> : <Navigate to="/login" />} />
+
           {/* Auth Routes */}
           <Route path="/login" element={!user ? <LoginPage /> : <Navigate to="/" />} />
-          <Route path="/register" element={!user ? <RegisterPage /> : <Navigate to="/" />} /> {/* <-- ADDED THE REGISTER ROUTE */}
+          <Route path="/register" element={!user ? <RegisterPage /> : <Navigate to="/" />} />
           
           {/* Catch-all route */}
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       </main>
-      
+
       <Footer />
     </div>
   );
@@ -84,7 +132,6 @@ const AppRoutes = () => {
 // ==========================================
 // MAIN APP WRAPPER
 // ==========================================
-// We wrap everything in a SINGLE Router to prevent navigation crashes.
 function App() {
   return (
     <Router>

@@ -2,7 +2,7 @@ import React, { useContext } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { AuthContext } from '../../context/AuthContext';
 
-const AdminSidebar = () => {
+const TechnicianSidebar = () => {
     const { logout } = useContext(AuthContext);
     const navigate = useNavigate();
     const location = useLocation();
@@ -39,9 +39,10 @@ const AdminSidebar = () => {
             {/* Header */}
             <div className="p-6 relative z-10 border-b border-white/10">
                 <h2 className="text-2xl font-extrabold tracking-widest bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent flex items-center gap-3 uppercase">
-                    <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-400 to-cyan-400 flex items-center justify-center text-white shadow-[0_0_15px_rgba(56,189,248,0.4)]">
+                    <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-400 to-teal-400 flex items-center justify-center text-white shadow-[0_0_15px_rgba(52,211,153,0.4)]">
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
                         </svg>
                     </div>
                     Nexus
@@ -50,48 +51,15 @@ const AdminSidebar = () => {
             
             {/* Nav Links */}
             <div className="flex-1 px-4 py-6 space-y-2 relative z-10 overflow-y-auto custom-scrollbar">
-                <div className="text-xs font-bold text-blue-300/60 uppercase tracking-wider mb-4 px-2">Main Menu</div>
+                <div className="text-xs font-bold text-blue-300/60 uppercase tracking-wider mb-4 px-2">Workspace</div>
                 
                 <NavItem 
-                    to="/admin/dashboard" 
-                    exact={true}
-                    label="Dashboard" 
+                    to="/technician/dashboard" 
+                    label="My Dashboard" 
                     icon={
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
                     } 
                 />
-                
-                <NavItem 
-                    to="/facilities" 
-                    label="Manage Facilities" 
-                    icon={
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
-                    } 
-                />
-                
-                <NavItem 
-                    to="/admin/bookings" 
-                    label="All Bookings" 
-                    icon={
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                    } 
-                />
-                
-                <NavItem 
-                    to="/incidents" 
-                    label="Maintenance Tickets" 
-                    icon={
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
-                    } 
-                />
-                
-                {/* Temporary inactive nav item */}
-                <div className="flex items-center gap-3 px-4 py-3 rounded-xl cursor-default transition-all duration-300 font-medium text-blue-100/40">
-                    <div className="text-blue-200/30">
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
-                    </div>
-                    User Management <span className="ml-auto text-[10px] bg-blue-900/50 px-2 py-0.5 rounded text-blue-300/50">WIP</span>
-                </div>
             </div>
 
             {/* Logout Footer */}
@@ -110,4 +78,4 @@ const AdminSidebar = () => {
     );
 };
 
-export default AdminSidebar;
+export default TechnicianSidebar;
