@@ -7,30 +7,30 @@ import Footer from './components/common/Footer';
 
 // --- ADMIN ---
 import AdminSidebar from './components/admin/AdminSidebar';
-import AdminDashboard from './pages/admin/AdminDashboard'; // Lowercase
-import AdminBookings from './pages/bookings/AdminBookings'; // Lowercase
+import AdminDashboard from './Pages/admin/AdminDashboard'; // UPDATED to Pages
+import AdminBookings from './Pages/bookings/AdminBookings'; // UPDATED to Pages
 
 // --- TECHNICIAN ---
 import TechnicianSidebar from './components/technician/TechnicianSidebar';
-import TechnicianDashboard from './Pages/technician/TechnicianDashboard'; // UPPERCASE P (GitHub Fix)
+import TechnicianDashboard from './Pages/technician/TechnicianDashboard'; 
 
 // --- STUDENT ---
 import StudentNavbar from './components/student/StudentNavbar';
-import HomePage from './pages/student/HomePage'; // Lowercase
-import StudentBookings from './Pages/bookings/StudentBookings'; // UPPERCASE P (GitHub Fix)
+import HomePage from './Pages/student/HomePage'; // UPDATED to Pages
+import StudentBookings from './Pages/bookings/StudentBookings'; 
 
 // --- FACILITIES ---
-import FacilitiesCatalogue from './pages/facilities/FacilitiesCatalogue'; // Lowercase
-import FacilityDetails from './Pages/facilities/FacilityDetails'; // UPPERCASE P (GitHub Fix)
+import FacilitiesCatalogue from './Pages/facilities/FacilitiesCatalogue'; // UPDATED to Pages
+import FacilityDetails from './Pages/facilities/FacilityDetails'; 
 
 // --- INCIDENTS ---
-import IncidentList from './Pages/incidents/IncidentList'; // UPPERCASE P (GitHub Fix)
-import CreateIncident from './Pages/incidents/CreateIncident'; // UPPERCASE P (GitHub Fix)
-import TicketDetails from './Pages/incidents/TicketDetails'; // UPPERCASE P (GitHub Fix)
+import IncidentList from './Pages/incidents/IncidentList'; 
+import CreateIncident from './Pages/incidents/CreateIncident'; 
+import TicketDetails from './Pages/incidents/TicketDetails'; 
 
 // --- AUTH ---
-import LoginPage from './pages/auth/LoginPage'; // Lowercase
-import RegisterPage from './pages/auth/RegisterPage'; // Lowercase
+import LoginPage from './Pages/auth/LoginPage'; // UPDATED to Pages
+import RegisterPage from './Pages/auth/RegisterPage'; // UPDATED to Pages
 
 const AppRoutes = () => {
   const { user, loading } = useContext(AuthContext);
