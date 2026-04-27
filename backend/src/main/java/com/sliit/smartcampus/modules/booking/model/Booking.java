@@ -1,11 +1,13 @@
 package com.sliit.smartcampus.modules.booking.model;
 
-import com.sliit.smartcampus.common.enums.BookingStatus;
-import lombok.Data;
+import java.time.LocalDateTime;
+
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.time.LocalDateTime;
+import com.sliit.smartcampus.common.enums.BookingStatus;
+
+import lombok.Data;
 
 @Data
 @Document(collection = "bookings")
@@ -26,4 +28,9 @@ public class Booking {
     private LocalDateTime endTime;
     
     private BookingStatus status = BookingStatus.PENDING; 
+    
+    // --- NEW: QR CODE CHECK-IN TRACKER ---
+    private boolean checkedIn = false; 
+
+    private LocalDateTime createdAt = LocalDateTime.now();
 }

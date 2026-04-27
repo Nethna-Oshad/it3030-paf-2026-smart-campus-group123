@@ -85,9 +85,14 @@ const StudentNavbar = () => {
                     </span>
 
                     {user && (
-                        <span onClick={() => navigate('/my-bookings')} style={{ cursor: 'pointer', fontWeight: 'bold', color: '#495057' }}>
-                            My Bookings
-                        </span>
+                        <>
+                            <span onClick={() => navigate('/my-bookings')} style={{ cursor: 'pointer', fontWeight: 'bold', color: '#495057' }}>
+                                My Bookings
+                            </span>
+                            <span onClick={() => navigate('/my-incidents')} style={{ cursor: 'pointer', fontWeight: 'bold', color: '#495057' }}>
+                                My Incidents
+                            </span>
+                        </>
                     )}
 
                     {/* Added from version 2 */}
