@@ -11,8 +11,10 @@ import com.sliit.smartcampus.modules.incident.model.enums.TicketPriority;
 import com.sliit.smartcampus.modules.incident.model.enums.TicketStatus;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@NoArgsConstructor
 @Document(collection = "incident_tickets")
 public class IncidentTicket {
     @Id
@@ -37,14 +39,9 @@ public class IncidentTicket {
     private LocalDateTime createdAt = LocalDateTime.now();
     private LocalDateTime updatedAt = LocalDateTime.now();
     
-    // --- NEW: SLA TIMERS ---
+    // --- SLA TIMERS ---
     private LocalDateTime firstRespondedAt; // When it was first answered/assigned
     private LocalDateTime resolvedAt;       // When it was fixed
-    
-
-    // --- NEW: SLA TIMERS ---
-    private LocalDateTime firstRespondedAt; // When it was first answered/assigned
-    private LocalDateTime resolvedAt; // When it was fixed
 
     @Data
     public static class AuditLog {
