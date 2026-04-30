@@ -36,6 +36,11 @@ public class IncidentTicket {
 
     private LocalDateTime createdAt = LocalDateTime.now();
     private LocalDateTime updatedAt = LocalDateTime.now();
+    
+    // --- NEW: SLA TIMERS ---
+    private LocalDateTime firstRespondedAt; // When it was first answered/assigned
+    private LocalDateTime resolvedAt;       // When it was fixed
+    
 
     // --- NEW: SLA TIMERS ---
     private LocalDateTime firstRespondedAt; // When it was first answered/assigned

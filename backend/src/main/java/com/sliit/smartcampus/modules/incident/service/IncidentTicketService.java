@@ -33,8 +33,7 @@ public class IncidentTicketService {
         if (ticket.getAuditLogs() == null) {
             ticket.setAuditLogs(new ArrayList<>());
         }
-        ticket.getAuditLogs().add(new AuditLog("Ticket Created",
-                ticket.getReportedByUserId() != null ? ticket.getReportedByUserId() : "System"));
+        ticket.getAuditLogs().add(new AuditLog("Ticket Created", ticket.getReportedByUserId() != null ? ticket.getReportedByUserId() : "System"));
         return repository.save(ticket);
     }
 
@@ -172,8 +171,7 @@ public class IncidentTicketService {
         if (ticket.getReportedByUserId() != null && !userId.equals(ticket.getReportedByUserId())) {
             String title = "New Reply on Ticket";
             String message = "A new comment was added to your incident ticket.";
-            notificationService.createNotification(ticket.getReportedByUserId(), title, message, "TICKET",
-                    ticket.getId());
+            notificationService.createNotification(ticket.getReportedByUserId(), title, message, "TICKET", ticket.getId());
         }
 
         return repository.save(ticket);
@@ -182,8 +180,7 @@ public class IncidentTicketService {
     public IncidentTicket updateComment(String ticketId, String commentId, String userId, String newText) {
         IncidentTicket ticket = getTicketById(ticketId);
 
-        if (ticket.getComments() == null)
-            return ticket;
+        if (ticket.getComments() == null) return ticket;
 
         TicketComment comment = ticket.getComments().stream()
                 .filter(c -> c.getId().equals(commentId))
@@ -204,8 +201,7 @@ public class IncidentTicketService {
     public IncidentTicket deleteComment(String ticketId, String commentId, String userId, String role) {
         IncidentTicket ticket = getTicketById(ticketId);
 
-        if (ticket.getComments() == null)
-            return ticket;
+        if (ticket.getComments() == null) return ticket;
 
         TicketComment comment = ticket.getComments().stream()
                 .filter(c -> c.getId().equals(commentId))
