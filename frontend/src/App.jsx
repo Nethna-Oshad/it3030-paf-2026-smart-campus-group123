@@ -25,7 +25,10 @@ import FacilityDetails from './Pages/facilities/FacilityDetails';
 
 // --- INCIDENTS ---
 import IncidentList from './Pages/incidents/IncidentList'; 
+<<<<<<< HEAD
 import StudentIncidents from './Pages/incidents/StudentIncidents';
+=======
+>>>>>>> 96439003954e2b9b579f2f78fc1a2198bdfaec45
 import CreateIncident from './Pages/incidents/CreateIncident'; 
 import TicketDetails from './Pages/incidents/TicketDetails'; 
 

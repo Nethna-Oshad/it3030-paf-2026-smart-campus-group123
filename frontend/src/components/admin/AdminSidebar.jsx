@@ -30,7 +30,7 @@ const AdminSidebar = () => {
     };
 
     return (
-        <div className="w-64 min-h-screen text-white flex flex-col relative overflow-hidden shrink-0 shadow-2xl z-50 border-r border-blue-900/50" style={{ background: 'linear-gradient(180deg, #084298 0%, #021a41 100%)' }}>
+        <div className="w-64 h-screen sticky top-0 text-white flex flex-col relative overflow-hidden shrink-0 shadow-2xl z-50 border-r border-blue-900/50" style={{ background: 'linear-gradient(180deg, #084298 0%, #021a41 100%)' }}>
             {/* Background Decorative Elements */}
             <div className="absolute top-0 right-0 -m-16 w-32 h-32 bg-white/10 rounded-full blur-2xl pointer-events-none"></div>
             <div className="absolute bottom-40 left-0 -m-20 w-40 h-40 bg-blue-500/20 rounded-full blur-3xl pointer-events-none"></div>
@@ -49,7 +49,7 @@ const AdminSidebar = () => {
             </div>
             
             {/* Nav Links */}
-            <div className="flex-1 px-4 py-6 space-y-2 relative z-10 overflow-y-auto custom-scrollbar">
+            <div className="flex-1 min-h-0 px-4 py-6 space-y-2 relative z-10 overflow-y-auto custom-scrollbar">
                 <div className="text-xs font-bold text-blue-300/60 uppercase tracking-wider mb-4 px-2">Main Menu</div>
                 
                 <NavItem 
@@ -85,13 +85,7 @@ const AdminSidebar = () => {
                     } 
                 />
                 
-                {/* Temporary inactive nav item */}
-                <div className="flex items-center gap-3 px-4 py-3 rounded-xl cursor-default transition-all duration-300 font-medium text-blue-100/40">
-                    <div className="text-blue-200/30">
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
-                    </div>
-                    User Management <span className="ml-auto text-[10px] bg-blue-900/50 px-2 py-0.5 rounded text-blue-300/50">WIP</span>
-                </div>
+                
             </div>
 
             {/* Logout Footer */}
